@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+- '6.11.2'
+- '8.2.1'
+deploy:
+  provider: npm
+  email: kuromatch@gmail.com
+  api_key:
+    secure: yY10TMxh3vj+BOpVO0cuuE7vLKY50+1gi7V2Q7icA8mwxnLBYPLmHB2Q0aiJaNhwuUV3MfhqxdSGjVfvkomaLP5r2SHP0Dm7sPBnsbylaSA+H1zP7xduYWMph1u5bM1F/hTx8txW0uvgLo0PXyq774XQ0JQnnTw1NqfwP+lwzTPyiIqGVKPSGQ9XC6BiiOFA1aKwYFyngWey7YOO2mTyOoaHfwIPmgGVtBYKxkaMUeV/FNI6ObH5X/YmVUzTFxn2kbzudF/CNwqdmlAbQy+rjwKQqf3WkhqzBwi384YOIVeBihwnQauc0sC33uqwa8e140QSzj+vSZZ1IS2yM8fB3uneM7BPIrgd4p/F3Ablo5NfKJauM5xp9YDLm6mSt9FqH3ad71idzz4Mf7EYzzaSMix6RSTgCAOZZY4tOVjG9mOlGLfEHGlbmnLiLqshJk10mDSEC1rQhRz3HVerZNLU9kzXLIyGeuTL4kbAEPSVukY8VcurRcnvtmR8EGdhQTKVaG4+r+IvGZY9mW3f1pKLJqt99ZfAy1l8utPC2jcZVstVttAdyvQbtmDzggOXHl4QLpmmD80cdbuC8Eol82EQnMm+rNhaAArks0K7JQaUYixUgpgmYrpDWE/E6lEmuBxrD3LncQiUPgNs6yl0mviSt572FEmNOej1xIEUFp7cdnc=
+  on:
+    tags: true
+    repo: kuromaty/kuromaty
