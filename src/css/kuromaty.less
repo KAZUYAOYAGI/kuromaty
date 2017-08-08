@@ -1,0 +1,30 @@
+@charset "UTF-8";
+/*!
+    Copyright 2017 Kuromatch
+*/
+
+.kuromaty {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .kuromaty-chart {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        cursor: crosshair;
+        touch-action: none;
+        box-sizing: border-box;
+
+        /* if you need */
+        border: none;
+
+        > canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    }
+}
