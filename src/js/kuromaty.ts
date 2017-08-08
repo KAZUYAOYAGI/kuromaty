@@ -1167,7 +1167,10 @@ export class Kuromaty {
             backCount = start * period + (date.getMinutes() % period) - period;
         }
 
-        let i = Math.min((barCount - 1) * period + backCount - 1, chart.bars.length - 1);
+        let i = Math.min(
+            (barCount * period) + backCount - 1,
+            chart.bars.length - 1
+        );
         for (; i >= backCount; i--) {
             date = new Date(mBars[i][0]);
 
@@ -1197,7 +1200,7 @@ export class Kuromaty {
             bars[0][7] = mBars[i][7] || 0;
         }
 
-        return bars;
+        return bars.slice(0, barCount);
     }
 
     private _contextmenuHandler(ev: MouseEvent) {
