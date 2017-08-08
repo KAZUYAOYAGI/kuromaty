@@ -7,7 +7,7 @@
   "scripts": {
     "build": "gulp build",
     "watch": "gulp watch",
-    "prepublish": "gulp build",
+    "prepublishOnly": "gulp build",
     "test": "echo \"Warning: no test specified yet\" && exit 0"
   },
   "repository": {
