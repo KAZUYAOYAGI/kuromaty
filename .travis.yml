@@ -5,6 +5,7 @@ before_script:
   - npm install -g gulp
   - npm link gulp
 deploy:
+  skip_cleanup: true
   provider: npm
   email: kuromatch@gmail.com
   api_key:
