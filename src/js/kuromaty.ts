@@ -2,7 +2,6 @@
     Copyright 2017 Kuromatch
 */
 import * as util from "./util";
-import {toStringWithSign} from "./util";
 
 export type PositionSide = "L" | "S";
 
@@ -1028,7 +1027,7 @@ export class Kuromaty {
                         "  ↑" + chart._bars[i][2] +
                         "  ↓" + chart._bars[i][3] +
                         "  ×" + chart._bars[i][4] +
-                        "  " + toStringWithSign(diff) + "%"
+                        "  " + util.toStringWithSign(diff) + "%"
                     ),
                     10,
                     20
@@ -1059,7 +1058,7 @@ export class Kuromaty {
                 this.overlay.context.textAlign = "left";
                 this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
                 this.overlay.context.fillText(
-                    toStringWithSign(margin),
+                    util.toStringWithSign(margin),
                     10,
                     this.cursorY - 5
                 );
@@ -1106,7 +1105,7 @@ export class Kuromaty {
             this.overlay.context.textAlign = "left";
             this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
             this.overlay.context.fillText(
-                "評価損益: " + toStringWithSign(margin),
+                "評価損益: " + util.toStringWithSign(margin),
                 10,
                 80
             );
@@ -1482,7 +1481,7 @@ export class Kuromaty {
         ctx.globalAlpha = 1;
         ctx.fillStyle = color;
         ctx.fillText(
-            size + " " + side + ", " + toStringWithSign(margin),
+            size + " " + side + ", " + util.toStringWithSign(margin),
             x + 6,
             y - 5
         );
