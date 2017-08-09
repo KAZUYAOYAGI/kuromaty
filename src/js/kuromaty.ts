@@ -2,6 +2,7 @@
     Copyright 2017 Kuromatch
 */
 import * as util from "./util";
+import {toStringWithSign} from "./util";
 
 export type PositionSide = "L" | "S";
 
@@ -1020,10 +1021,6 @@ export class Kuromaty {
                 this.overlay.context.fillStyle = this.color.textStrong;
                 this.overlay.context.font = "11px monospace";
                 const diff = Math.round((100 - (chart._bars[i][1] / chart._bars[i][4] * 100)) * 1000) / 1000;
-                let diffStr = diff.toString(10);
-                if (diff > 0) {
-                    diffStr = "+" + diffStr;
-                }
                 this.overlay.context.fillText(
                     (
                         barDate.toLocaleString() +
@@ -1031,7 +1028,7 @@ export class Kuromaty {
                         "  ↑" + chart._bars[i][2] +
                         "  ↓" + chart._bars[i][3] +
                         "  ×" + chart._bars[i][4] +
-                        "  " + diff + "%"
+                        "  " + toStringWithSign(diff) + "%"
                     ),
                     10,
                     20
@@ -1061,12 +1058,8 @@ export class Kuromaty {
                 this.overlay.context.save();
                 this.overlay.context.textAlign = "left";
                 this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
-                let marginStr = margin.toString(10);
-                if (margin > 0) {
-                    marginStr = "+" + marginStr;
-                }
                 this.overlay.context.fillText(
-                    marginStr,
+                    toStringWithSign(margin),
                     10,
                     this.cursorY - 5
                 );
@@ -1112,12 +1105,8 @@ export class Kuromaty {
             this.overlay.context.font = "11px monospace";
             this.overlay.context.textAlign = "left";
             this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
-            let marginStr = margin.toString(10);
-            if (margin > 0) {
-                marginStr = "+" + marginStr;
-            }
             this.overlay.context.fillText(
-                "評価損益: " + marginStr,
+                "評価損益: " + toStringWithSign(margin),
                 10,
                 80
             );
@@ -1467,10 +1456,6 @@ export class Kuromaty {
         if (side === "S") {
             margin = -margin;
         }
-        let marginStr = margin.toString(10);
-        if (margin > 0) {
-            marginStr = "+" + marginStr;
-        }
 
         this._drawPriceTag(
             ctx,
@@ -1497,7 +1482,7 @@ export class Kuromaty {
         ctx.globalAlpha = 1;
         ctx.fillStyle = color;
         ctx.fillText(
-            size + " " + side + ", " + marginStr,
+            size + " " + side + ", " + toStringWithSign(margin),
             x + 6,
             y - 5
         );
