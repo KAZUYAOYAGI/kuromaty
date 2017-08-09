@@ -16,5 +16,5 @@ export function fixedDecimal(number: number, length: number): string {
 }
 
 export function toStringWithSign(number: number): string {
-   return (number > 0 ? "+" : "") + number.toString(10);
+    return (number > 0 ? "+" : "") + number.toString(10);
 }
