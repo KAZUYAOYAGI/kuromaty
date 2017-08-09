@@ -17,7 +17,7 @@ export interface Options {
     chartOverlay?: boolean;
     barWidth?: number;
     barMargin?: number;
-    decimal?: number;
+    decimalPower?: number;
 }
 
 export interface ColorOption {
@@ -149,6 +149,7 @@ export class Kuromaty {
     private _lastPointerButtons = 0;
     private _dragStartX: number;
     private _dragStartI: number;
+    private _decimal: number;
 
     constructor(container?: Element, public options: Options = {}) {
         
@@ -163,7 +164,8 @@ export class Kuromaty {
         }
         options.barWidth = options.barWidth || 5;
         options.barMargin = options.barMargin || 3;
-        options.decimal = options.decimal || 1;
+        options.decimalPower = options.decimalPower || 0;
+        this._decimal = parseInt("1" + Array(options.decimalPower + 1).join("0"), 10);
 
         this._create();
 
@@ -445,7 +447,8 @@ export class Kuromaty {
               chartM = barW * Math.max(1, 4 - this.barIndex),
               chartI = Math.max(0, this.barIndex - 3),
               barCount = Math.round((chartW - chartM) / barW),
-              decimal = this.options.decimal,
+              decimal = this._decimal,
+              decimalPower = this.options.decimalPower,
               period = this.timePeriod;
 
         let i = 0,
@@ -651,7 +654,7 @@ export class Kuromaty {
                         
                         this.overlay.context.textAlign = (i < l / 2) ? "right" : "left";
                         this.overlay.context.fillText(
-                            bar[2].toString(10),
+                            util.fixedDecimal(bar[2], decimalPower),
                             barX - ((i < l / 2) ? 0 : 5),
                             hpY - 8
                         );
@@ -684,7 +687,7 @@ export class Kuromaty {
 
                         this.overlay.context.textAlign = (i < l / 2) ? "right" : "left";
                         this.overlay.context.fillText(
-                            bar[3].toString(10),
+                            util.fixedDecimal(bar[3], decimalPower),
                             barX - ((i < l / 2) ? 0 : 5),
                             lpY + 15
                         );
@@ -725,7 +728,7 @@ export class Kuromaty {
                     // time
                     this.grid.context.fillStyle = this.color.text;
                     this.grid.context.fillText(
-                        barDate.getHours() +  ":" + util.zeroPadding(barDate.getMinutes(), 2),
+                        `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`,
                         barX - Math.ceil(this.options.barWidth / 2),
                         canvasH - 4
                     );
@@ -758,7 +761,7 @@ export class Kuromaty {
                     this.grid.context.font = "10px Arial";
                     this.grid.context.textAlign = "left";
                     this.grid.context.fillText(
-                        (Math.round(i * decimal) / decimal).toString(10),
+                        util.fixedDecimal(i, decimalPower),
                         chartW + 2,
                         cp + 3.5
                     );
@@ -954,7 +957,7 @@ export class Kuromaty {
         this.grid.context.textAlign = "right";
         this.grid.context.fillStyle = this.color.text;
         this.grid.context.fillText(
-            ":" + util.zeroPadding(barDate.getMinutes(), 2),
+            `:${util.zeroPadding(barDate.getMinutes(), 2)}`,
             canvasW - 45,
             canvasH - 4
         );
@@ -1009,7 +1012,7 @@ export class Kuromaty {
                 this.grid.context.textAlign = "center";
                 this.grid.context.fillStyle = this.color.textStrong;
                 this.grid.context.fillText(
-                    ":" + util.zeroPadding(barDate.getMinutes(), 2),
+                    `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`,
                     pX + this.options.barWidth / 2,
                     canvasH - 4
                 );
@@ -1018,16 +1021,16 @@ export class Kuromaty {
                 this.overlay.context.save();
                 this.overlay.context.textAlign = "left";
                 this.overlay.context.fillStyle = this.color.textStrong;
-                this.overlay.context.font = "11px monospace";
+                this.overlay.context.font = "12px monospace";
                 const diff = Math.round((100 - (chart._bars[i][1] / chart._bars[i][4] * 100)) * 1000) / 1000;
                 this.overlay.context.fillText(
                     (
                         barDate.toLocaleString() +
-                        "  〇" + chart._bars[i][1] +
-                        "  ↑" + chart._bars[i][2] +
-                        "  ↓" + chart._bars[i][3] +
-                        "  ×" + chart._bars[i][4] +
-                        "  " + util.toStringWithSign(diff) + "%"
+                        `  ○ ${util.fixedDecimal(chart._bars[i][1], decimalPower)}` +
+                        `  ↑ ${util.fixedDecimal(chart._bars[i][2], decimalPower)}` +
+                        `  ↓ ${util.fixedDecimal(chart._bars[i][3], decimalPower)}` +
+                        `  × ${util.fixedDecimal(chart._bars[i][4], decimalPower)}` +
+                        `  ${util.toStringWithSign(diff)}%`
                     ),
                     10,
                     20
@@ -1105,7 +1108,7 @@ export class Kuromaty {
             this.overlay.context.textAlign = "left";
             this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
             this.overlay.context.fillText(
-                "評価損益: " + util.toStringWithSign(margin),
+                `評価損益: ${util.toStringWithSign(margin)}`,
                 10,
                 80
             );
@@ -1381,7 +1384,7 @@ export class Kuromaty {
         ctx.fillStyle = textColor;
         ctx.font = "10px Arial";
         ctx.fillText(
-            price.toString(10),
+            util.fixedDecimal(price, this.options.decimalPower),
             w + 2,
             y + 3.5
         );
@@ -1411,7 +1414,7 @@ export class Kuromaty {
         ctx.fillStyle = color;
         ctx.font = "10px Arial";
         ctx.fillText(
-            price.toString(10),
+            util.fixedDecimal(price, this.options.decimalPower),
             w + 2,
             y + 3.5
         );
@@ -1481,7 +1484,7 @@ export class Kuromaty {
         ctx.globalAlpha = 1;
         ctx.fillStyle = color;
         ctx.fillText(
-            size + " " + side + ", " + util.toStringWithSign(margin),
+            `${size} ${side}, ${util.toStringWithSign(margin)}`,
             x + 6,
             y - 5
         );
