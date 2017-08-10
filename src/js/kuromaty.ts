@@ -1036,7 +1036,7 @@ export class Kuromaty {
                     20
                 );
                 this.overlay.context.fillText(
-                    "[価格マーカー] 左クリックで追加 / 右クリックでクリア",
+                    "[価格マーカー] 左クリックで追加・削除 / 右クリックで全消去",
                     10,
                     40
                 );
