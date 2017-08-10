@@ -1254,8 +1254,13 @@ export class Kuromaty {
             this._lastPointerdown[1] === offsetY
         ) {
             if (this._lastPointerButtons === 1) {
-                if (this.cursorPrice && this.pinnedPrices.indexOf(this.cursorPrice) === -1) {
-                    this.pinnedPrices.push(this.cursorPrice);
+                if (this.cursorPrice) {
+                    const pinnedPriceIndex = this.pinnedPrices.indexOf(this.cursorPrice);
+                    if (pinnedPriceIndex === -1) {
+                        this.pinnedPrices.push(this.cursorPrice);
+                    } else {
+                        this.pinnedPrices.splice(pinnedPriceIndex, 1);
+                    }
                 }
             } else if (this._lastPointerButtons === 2) {
                 this.pinnedPrices = [];
