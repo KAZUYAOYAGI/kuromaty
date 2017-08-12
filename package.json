@@ -5,6 +5,7 @@
   "homepage": "https://kuromat.ch/",
   "main": "lib/es6/kuromaty.js",
   "scripts": {
+    "start": "ws -f tiny --spa test/index.html -r \"/api/* -> https://kuromat.ch/api/$1\"",
     "build": "gulp build",
     "watch": "gulp watch",
     "prepublishOnly": "gulp build",
@@ -33,6 +34,7 @@
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
     "less-plugin-autoprefix": "^1.5.1",
+    "local-web-server": "^2.2.4",
     "merge2": "^1.1.0",
     "typescript": "^2.4.2",
     "vinyl-buffer": "^1.0.0",

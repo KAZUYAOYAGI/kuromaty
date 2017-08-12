@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="author" content="Kuromatch">
+
+    <title>Kuromaty Test</title>
+
+    <!-- Custom styles for this template -->
+    <link href="lib/kuromaty.min.css" rel="stylesheet">
+    <link href="test/index.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div id="loading"></div>
+
+    <header id="header">
+      <div id="title" class="item">Initializing...</div>
+
+      <div class="pulldown">
+        <div id="period">Time Period ▼</div>
+        <div id="period-items" class="pulldown-items"></div>
+      </div>
+
+      <div class="item" id="zoomout">
+        <span>－</span>
+      </div>
+      <div class="item" id="zoomin">
+        <span>＋</span>
+      </div>
+    </header>
+
+    <div class="chart" id="kuromaty"></div>
+
+    <footer id="footer">
+      <div class="powered">
+        <a href="https://kuromat.ch/" target="_blank">黒マチャート <span id="ver"></span>
+          <span class="glyphicon glyphicon-signal"></span>
+          <span id="conn" title="接続数">*</span></a>
+      </div>
+
+      <div class="item">
+        <span id="dot" class="realtime-dot loading"></span>
+        <span id="timestamp">...</span>
+      </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    <script src="https://pubnub.a.ssl.fastly.net/pubnub.min.js"></script>
+    <script src="https://kuromat.ch/socket.io/socket.io.js"></script>
+    <script src="lib/kuromaty.js"></script>
+    <script src="test/index.js"></script>
+  </body>
+</html>

@@ -1,0 +1,126 @@
+@charset "UTF-8";
+
+body {
+    overflow: hidden;
+    background-color: #111;
+}
+
+div.chart {
+    position: absolute;
+    top: 29px;
+    right: 0;
+    bottom: 29px;
+    left: 0;
+    box-sizing: border-box;
+}
+.kuromaty .kuromaty-chart {
+    border-width: 1px !important;
+    border-style: solid !important;
+}
+
+header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 29px;
+    background: #12151b;
+    border: 1px solid #2f2f36;
+    border-bottom: none;
+    user-select: none;
+    z-index: 1;
+    margin-right: 45px;
+    box-sizing: border-box;
+}
+header > div {
+    float: left;
+    height: 28px;
+    font-size: 11px;
+    color: #999;
+    line-height: 28px;
+    padding: 0 10px;
+    border-right: 1px solid #2f2f36;
+    cursor: pointer;
+}
+header > div.right {
+    float: right;
+    border-right: none;
+    border-left: 1px solid #2f2f36;
+}
+header > div.pulldown {
+    height: 28px;
+    overflow: hidden;
+    background: #12151b;
+    padding: 0 0;
+    box-shadow: -1px 0 0 #2f2f36;
+    }
+header > div.pulldown:hover {
+    height: auto;
+    overflow: visible;
+}
+header > div.pulldown > div {
+    padding: 0 10px;
+}
+header > div.pulldown > div.pulldown-items {
+    border-bottom: 1px solid #2f2f36;
+}
+header div.item.selected,
+header div.item:hover,
+header div.item:active {
+    color: #fff;
+}
+
+footer {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 29px;
+    background: #12151b;
+    border: 1px solid #2f2f36;
+    border-top: none;
+    box-sizing: border-box;
+}
+footer > div {
+    height: 28px;
+    line-height: 28px;
+    font-size: 11px;
+    padding: 0 10px;
+    color: #999;
+}
+footer > div.item {
+    float: right;
+    border-left: 1px solid #2f2f36;
+}
+footer > div.item > span.realtime-dot {
+    border-radius: 20px;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #3eb370;
+    margin-right: 3px;
+}
+footer > div.item > span.realtime-dot.loading {
+    background-color: #e9546b;
+}
+
+div.powered {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-right: 1px solid #2f2f36;
+}
+div.powered:hover {
+    opacity: 1;
+}
+div.powered a {
+    color: #aaa;
+    text-decoration: none;
+}
+div.powered a:hover {
+    opacity: 1;
+    color: white;
+}
+div.powered span#ver {
+    color: #656565;
+}
