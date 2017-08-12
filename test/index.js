@@ -187,7 +187,7 @@
     });
 
     // 足 (v2.26, v2.29)
-    [0, 1, 3, 5, 10, 15, 30, 60].forEach(function (period) {
+    [0, 1, 3, 5, 10, 15, 30, 60, 120].forEach(function (period) {
 
         var btn = $("<div class='item'></div>");
         

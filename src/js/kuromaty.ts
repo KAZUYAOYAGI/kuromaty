@@ -714,7 +714,9 @@ export class Kuromaty {
                     (period >= 5 && period < 10 && barDate.getMinutes() % 60 === 0) ||
                     (period >= 10 && period < 15 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 2 === 0) ||
                     (period >= 15 && period < 30 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 3 === 0) ||
-                    (period >= 30 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 6 === 0)
+                    (period >= 30 && period < 60 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 6 === 0) ||
+                    (period >= 60 && period < 120 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 12 === 0) ||
+                    (period >= 120 && barDate.getMinutes() % 60 === 0 && barDate.getHours() === 0)
                 ) {
                     // vertical grid
                     this.grid.context.fillStyle = this.color.grid;
@@ -726,9 +728,15 @@ export class Kuromaty {
                     );
 
                     // time
+                    let timeStr;
+                    if (barDate.getHours() === 0) {
+                        timeStr = `${barDate.getMonth() - 1}/${barDate.getDate()}'`;
+                    } else {
+                        timeStr = `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`;
+                    };
                     this.grid.context.fillStyle = this.color.text;
                     this.grid.context.fillText(
-                        `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`,
+                        timeStr,
                         barX - Math.ceil(this.options.barWidth / 2),
                         canvasH - 4
                     );
@@ -1165,7 +1173,14 @@ export class Kuromaty {
         for (; i >= backCount; i--) {
             date = new Date(mBars[i][0]);
 
-            if (date.getMinutes() % period === 0 || bars.length === 0) {
+            if (
+                bars.length === 0 ||
+                (
+                    date.getMinutes() % period === 0 &&
+                    date.getHours() % Math.ceil(period / 60) === 0 &&
+                    bars[0][0] < mBars[i][0]
+                )
+            ) {
                 bars.unshift([
                     date.setSeconds(0, 0),
                     mBars[i][1],
