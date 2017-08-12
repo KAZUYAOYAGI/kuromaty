@@ -2,8 +2,10 @@
     Copyright 2017 Kuromatch
 */
 import * as util from "./util";
+import {Position as _Position, PositionLike} from "./Position";
+import {PositionSet} from "./PositionSet";
 
-export type PositionSide = "L" | "S";
+export {Side as PositionSide} from "./Position";
 
 /** time, open, high, low, close, volume, askDepth, bidDepth */
 export type Bar = [number, number, number, number, number, number, number, number];
@@ -88,11 +90,7 @@ export interface InLayer {
     context: CanvasRenderingContext2D;
 }
 
-export interface Position {
-    price: number;
-    size: number;
-    side: PositionSide;
-}
+export type Position = PositionLike;
 
 export class Kuromaty {
 
@@ -100,7 +98,6 @@ export class Kuromaty {
     barIndex = 0;
     cursorPrice = 0;
     pinnedPrices: number[] = [];
-    positions: Position[] = [];
     maxBarCount = 10000;
     hasDepleted = false;
     color: ColorOption = {
@@ -150,6 +147,7 @@ export class Kuromaty {
     private _dragStartX: number;
     private _dragStartI: number;
     private _decimal: number;
+    private _positions: PositionSet = new PositionSet();
 
     constructor(container?: Element, public options: Options = {}) {
         
@@ -330,8 +328,19 @@ export class Kuromaty {
         this._chartContainer.style.borderColor = this.color.border;
     }
 
+    setPositions(positions: PositionLike[]) {
+        this._positions = new PositionSet(positions);
+    }
+
+    /**
+     * @deprecated
+     * @param {Position[]} positions
+     */
+    set positions(positions: PositionLike[]) {
+        this.setPositions(positions);
+    }
+
     private _create() {
-        
         this._rootContainer = document.createElement("div");
         this._rootContainer.className = "kuromaty";
         this._chartContainer = document.createElement("div");
@@ -864,15 +873,13 @@ export class Kuromaty {
                 });
 
                 // Positions (testing)
-                this.positions.forEach(position => {
+                this._positions.forEach(position => {
                     this._drawPositionMarker(
                         this.overlay.context,
                         0,
                         Math.round((chart.highest - position.price) * chart.ratio),
                         chartW,
-                        position.price,
-                        position.side,
-                        position.size || 0,
+                        position,
                         chart.latest
                     );
                 });
@@ -1052,18 +1059,8 @@ export class Kuromaty {
             }
 
             // Total Margin of Positions on Cursor (testing)
-            if (this.positions.length !== 0) {
-                let margin = 0;
-
-                this.positions.forEach(pos => {
-                    let m = (this.cursorPrice - pos.price) * pos.size;
-                    if (pos.side === "S") {
-                        m = -m;
-                    }
-                    margin += m;
-                });
-
-                margin = Math.floor(margin);
+            if (!this._positions.isEmpty()) {
+                const margin = Math.floor(this._positions.marginAgainst(this.cursorPrice));
 
                 this.overlay.context.save();
                 this.overlay.context.textAlign = "left";
@@ -1097,19 +1094,9 @@ export class Kuromaty {
         } // cursor
 
         // Total Margin of Positions (testing)
-        if (this.positions.length !== 0) {
+        if (!this._positions.isEmpty()) {
             const chart = this.charts[0];
-            let margin = 0;
-
-            this.positions.forEach((pos) => {
-                let m = (chart.latest - pos.price) * pos.size;
-                if (pos.side === "S") {
-                    m = -m;
-                }
-                margin += m;
-            });
-
-            margin = Math.floor(margin);
+            const margin = Math.floor(this._positions.marginAgainst(chart.latest));
 
             this.overlay.context.save();
             this.overlay.context.font = "11px monospace";
@@ -1469,22 +1456,17 @@ export class Kuromaty {
     }
 
     private _drawPositionMarker(ctx: CanvasRenderingContext2D,
-                                x: number, y: number, w: number, price: number,
-                                side: PositionSide, size: number, ltp: number) {
+                                x: number, y: number, w: number, position: _Position, ltp: number) {
 
-        const color = side === "L" ? this.color.long : this.color.short;
-
-        let margin = Math.floor((ltp - price) * size);
-        if (side === "S") {
-            margin = -margin;
-        }
+        const color = position.side === "L" ? this.color.long : this.color.short;
+        const margin = Math.floor(position.marginAgainst(ltp));
 
         this._drawPriceTag(
             ctx,
             x,
             y,
             w,
-            price,
+            position.price.toNumber(),
             color,
             "#ffffff",
             [5, 2, 2]
@@ -1504,7 +1486,7 @@ export class Kuromaty {
         ctx.globalAlpha = 1;
         ctx.fillStyle = color;
         ctx.fillText(
-            `${size} ${side}, ${util.toStringWithSign(margin)}`,
+            `${position.size} ${position.side}, ${util.toStringWithSign(margin)}`,
             x + 6,
             y - 5
         );

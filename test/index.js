@@ -320,22 +320,7 @@
         window.addEventListener("message", function (event) {
             var message = JSON.parse(event.data);
             if (message.kind === "positions") {
-                var positions = [];
-
-                message.body.forEach(function (pos) {
-                    var add = true;
-                    positions.forEach(function (_pos) {
-                        if (_pos.price === pos.price) {
-                            add = false;
-                            _pos.size += pos.size;
-                        }
-                    });
-                    if (add) {
-                        positions.push(pos);
-                    }
-                });
-
-                kuromaty.positions = positions;
+                kuromaty.setPositions(message.body);
             }
         }, false);
     }

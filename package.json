@@ -39,5 +39,8 @@
     "typescript": "^2.4.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
+  },
+  "dependencies": {
+    "decimal.js-light": "^2.2.3"
   }
 }
