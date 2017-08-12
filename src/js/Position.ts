@@ -4,13 +4,13 @@
 
 "use strict";
 
-import {Decimal} from "decimal.js-light";
+import { Decimal } from "decimal.js-light";
 
 export type Side = "L" | "S";
 
 export interface PositionLike {
     price: number;
-    size: number|string;
+    size: number | string;
     side: Side;
 }
 

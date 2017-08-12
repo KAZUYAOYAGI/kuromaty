@@ -3,8 +3,8 @@
 */
 
 "use strict";
-import {Position, PositionLike} from "./Position";
-import {Decimal} from "decimal.js-light";
+import { Position, PositionLike } from "./Position";
+import { Decimal } from "decimal.js-light";
 
 export class PositionSet {
     private positions = {};
@@ -27,7 +27,7 @@ export class PositionSet {
             return;
         }
 
-        this.positions[key] =  position;
+        this.positions[key] = position;
         this._size++;
     }
 

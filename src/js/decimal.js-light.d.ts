@@ -10,5 +10,5 @@ declare module "decimal.js-light" {
         toString(): string;
     }
 
-    export type AcceptableValue = string|number|Decimal;
+    export type AcceptableValue = string | number | Decimal;
 }

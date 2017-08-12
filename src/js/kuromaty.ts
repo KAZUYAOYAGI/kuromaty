@@ -2,10 +2,10 @@
     Copyright 2017 Kuromatch
 */
 import * as util from "./util";
-import {Position as _Position, PositionLike} from "./Position";
-import {PositionSet} from "./PositionSet";
+import { Position as _Position, PositionLike } from "./Position";
+import { PositionSet } from "./PositionSet";
 
-export {Side as PositionSide} from "./Position";
+export { Side as PositionSide } from "./Position";
 
 /** time, open, high, low, close, volume, askDepth, bidDepth */
 export type Bar = [number, number, number, number, number, number, number, number];
@@ -150,7 +150,7 @@ export class Kuromaty {
     private _positions: PositionSet = new PositionSet();
 
     constructor(container?: Element, public options: Options = {}) {
-        
+
         if (typeof options.chartCount !== "number") {
             options.chartCount = 1;
         }
@@ -172,10 +172,10 @@ export class Kuromaty {
         }
     }
 
-    insertTo(container: Element)  {
+    insertTo(container: Element) {
 
         container.appendChild(this._rootContainer);
-        
+
         this.resize();
         this._hasRemoved = false;
 
@@ -183,7 +183,7 @@ export class Kuromaty {
     }
 
     remove() {
-        
+
         this._rootContainer.parentNode.removeChild(this._rootContainer);
 
         this.canvasW = this.canvasH = 0;
@@ -220,7 +220,7 @@ export class Kuromaty {
     }
 
     tick(index: number, tick: Tick) {
-    
+
         const chart = this.charts[index];
 
         chart.tickDelta = 0;
@@ -233,7 +233,7 @@ export class Kuromaty {
                 chart.ticks.pop();
             }
         }
-        
+
         let lastTime = Date.now() - 1000 * 60;
         if (chart.bars.length > 0) {
             lastTime = chart.bars[0][0];
@@ -369,7 +369,7 @@ export class Kuromaty {
             this.overlay.canvas.addEventListener("mousewheel", this._mousewheelHandler.bind(this)/* , { passive: true } */);
             this.overlay.canvas.addEventListener("contextmenu", this._contextmenuHandler.bind(this));
         }
-        
+
         for (let i = 0; i < this.options.chartCount; i++) {
             const chart = {
                 title: this.options.chartTitles[i] || "Untitled",
@@ -449,16 +449,16 @@ export class Kuromaty {
     private _draw() {
 
         const canvasW = this.canvasW,
-              canvasH = this.canvasH,
-              barW = this.options.barWidth + this.options.barMargin,
-              chartW = canvasW - 45,
-              chartH = canvasH - 16,
-              chartM = barW * Math.max(1, 4 - this.barIndex),
-              chartI = Math.max(0, this.barIndex - 3),
-              barCount = Math.round((chartW - chartM) / barW),
-              decimal = this._decimal,
-              decimalPower = this.options.decimalPower,
-              period = this.timePeriod;
+            canvasH = this.canvasH,
+            barW = this.options.barWidth + this.options.barMargin,
+            chartW = canvasW - 45,
+            chartH = canvasH - 16,
+            chartM = barW * Math.max(1, 4 - this.barIndex),
+            chartI = Math.max(0, this.barIndex - 3),
+            barCount = Math.round((chartW - chartM) / barW),
+            decimal = this._decimal,
+            decimalPower = this.options.decimalPower,
+            period = this.timePeriod;
 
         let i = 0,
             j = 0,
@@ -500,7 +500,7 @@ export class Kuromaty {
                 chart._bars = this._getBars(j, chartI, barCount, 25);
                 l = chart._bars.length - 25;
             }
-            
+
             if (chart.selected) {
                 if (barCount > l && this.maxBarCount > chart.bars.length && chart._bars.length > 0) {
                     this.hasDepleted = true;
@@ -660,7 +660,7 @@ export class Kuromaty {
 
                     if (chart.highestPricePrinted === false) {
                         chart.highestPricePrinted = true;
-                        
+
                         this.overlay.context.textAlign = (i < l / 2) ? "right" : "left";
                         this.overlay.context.fillText(
                             util.fixedDecimal(bar[2], decimalPower),
@@ -763,7 +763,7 @@ export class Kuromaty {
                     if (lp - cp < 80 || cp + 30 > chartH) {
                         continue;
                     }
-                    
+
                     // grid
                     this.grid.context.fillStyle = this.color.grid;
                     this.grid.context.fillRect(
@@ -1121,7 +1121,7 @@ export class Kuromaty {
         const chart = this.charts[index];
         const period = this.timePeriod;
         const barCount = count + hiddenCount;
-        
+
         if (chart.bars.length === 0) {
             return [];
         }
@@ -1143,7 +1143,7 @@ export class Kuromaty {
         }
 
         const bars: Bar[] = [],
-              mBars = chart.bars;
+            mBars = chart.bars;
 
         let date,
             backCount = 0;
@@ -1349,7 +1349,7 @@ export class Kuromaty {
     }
 
     private _drawBorder(ctx: CanvasRenderingContext2D,
-                        x: number, y: number, w: number, color: string, lineDash: number[]) {
+        x: number, y: number, w: number, color: string, lineDash: number[]) {
 
         ctx.save();
 
@@ -1366,15 +1366,15 @@ export class Kuromaty {
     }
 
     private _drawPriceTag(ctx: CanvasRenderingContext2D,
-                          x: number, y: number, w: number, price: number,
-                          color: string, textColor: string, lineDash: number[], tagColor?: string) {
+        x: number, y: number, w: number, price: number,
+        color: string, textColor: string, lineDash: number[], tagColor?: string) {
 
         this._drawBorder(ctx, x, y + 0.5, w - 5, color, lineDash);
-        
+
         w += x;
 
         ctx.save();
-        
+
         ctx.fillStyle = tagColor || color;
         ctx.beginPath();
         ctx.moveTo(w - 5, y);
@@ -1400,11 +1400,11 @@ export class Kuromaty {
     }
 
     private _drawPriceTag2(ctx: CanvasRenderingContext2D,
-                           x: number, y: number, w: number, price: number,
-                           color: string, lineDash: number[]) {
+        x: number, y: number, w: number, price: number,
+        color: string, lineDash: number[]) {
 
         this._drawBorder(ctx, x, y + 0.5, w - 5, color, lineDash);
-        
+
         w += x;
 
         ctx.save();
@@ -1430,7 +1430,7 @@ export class Kuromaty {
     }
 
     private _drawDepthIndicator(ctx: CanvasRenderingContext2D,
-                                x: number, y: number, value: number, color: string) {
+        x: number, y: number, value: number, color: string) {
 
         this._drawBorder(ctx, x, y + 0.5, -10, color, [2, 2]);
 
@@ -1456,7 +1456,7 @@ export class Kuromaty {
     }
 
     private _drawPositionMarker(ctx: CanvasRenderingContext2D,
-                                x: number, y: number, w: number, position: _Position, ltp: number) {
+        x: number, y: number, w: number, position: _Position, ltp: number) {
 
         const color = position.side === "L" ? this.color.long : this.color.short;
         const margin = Math.floor(position.marginAgainst(ltp));
@@ -1495,7 +1495,7 @@ export class Kuromaty {
     }
 
     private _drawSMA(ctx: CanvasRenderingContext2D,
-                     x: number, chart: Chart, count: number, value: number, color: string) {
+        x: number, chart: Chart, count: number, value: number, color: string) {
 
         const barW = this.options.barMargin + this.options.barWidth;
         x = x + barW;
