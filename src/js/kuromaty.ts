@@ -1340,6 +1340,11 @@ export class Kuromaty {
 
         ev.preventDefault();
 
+        if (ev.ctrlKey) {
+            this.zoom(ev.deltaY < 0 ? 1 : ev.deltaY > 0 ? -1 : 0);
+            return;
+        }
+
         this.barIndex -= Math.round(ev.deltaX ? ev.deltaX : -(ev.deltaY / 6));
         if (this.barIndex < 0) {
             this.barIndex = 0;
