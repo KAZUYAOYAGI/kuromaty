@@ -742,7 +742,7 @@ export class Kuromaty {
                         timeStr = `${barDate.getMonth() - 1}/${barDate.getDate()}'`;
                     } else {
                         timeStr = `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`;
-                    };
+                    }
                     this.grid.context.fillStyle = this.color.text;
                     this.grid.context.fillText(
                         timeStr,
