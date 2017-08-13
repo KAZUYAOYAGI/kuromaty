@@ -1316,7 +1316,7 @@ export class Kuromaty {
                 this._dragStartI = this.barIndex;
             }
             const deltaX = this._dragStartX - offsetX;
-            this.barIndex = this._dragStartI - Math.round(deltaX / (this.options.barWidth + this.options.barMargin))
+            this.barIndex = this._dragStartI - Math.round(deltaX / (this.options.barWidth + this.options.barMargin));
             if (this.barIndex < 0) {
                 this.barIndex = 0;
             } else if (this.barIndex >= this.charts[0].bars.length) {
