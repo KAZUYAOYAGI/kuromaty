@@ -197,10 +197,10 @@ export class Kuromaty {
         const w = this.canvasW = this._chartContainer.clientWidth;
         const h = this.canvasH = this._chartContainer.clientHeight;
 
-        for (const canvas of this.canvases) {
+        this.canvases.forEach(canvas => {
             canvas.width = w;
             canvas.height = h;
-        }
+        });
 
         this._hasUpdated = true;
     }
@@ -366,7 +366,7 @@ export class Kuromaty {
             this.overlay.canvas.addEventListener("pointerup", this._pointerupHandler.bind(this));
             this.overlay.canvas.addEventListener("pointermove", this._pointermoveHandler.bind(this));
             this.overlay.canvas.addEventListener("pointerout", this._pointeroutHandler.bind(this));
-            this.overlay.canvas.addEventListener("mousewheel", this._mousewheelHandler.bind(this)/* , { passive: true } */);
+            this.overlay.canvas.addEventListener("wheel", this._wheelHandler.bind(this)/* , { passive: true } */);
             this.overlay.canvas.addEventListener("contextmenu", this._contextmenuHandler.bind(this));
         }
 
@@ -1336,7 +1336,7 @@ export class Kuromaty {
         this.cursorX = this.cursorY = -1;
     }
 
-    private _mousewheelHandler(ev: MouseWheelEvent) {
+    private _wheelHandler(ev: MouseWheelEvent) {
 
         ev.preventDefault();
 
