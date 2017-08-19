@@ -1489,11 +1489,13 @@ export class Kuromaty {
         );
 
         ctx.globalAlpha = 1;
+        ctx.textAlign = "left";
         ctx.fillStyle = color;
         ctx.fillText(
             `${position.size} ${position.side}, ${util.toStringWithSign(margin)}`,
             x + 6,
-            y - 5
+            y - 5,
+            76
         );
 
         ctx.restore();
