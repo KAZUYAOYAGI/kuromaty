@@ -739,7 +739,7 @@ export class Kuromaty {
                     // time
                     let timeStr;
                     if (barDate.getHours() === 0) {
-                        timeStr = `${barDate.getMonth() - 1}/${barDate.getDate()}'`;
+                        timeStr = `${barDate.getMonth() + 1}/${barDate.getDate()}'`;
                     } else {
                         timeStr = `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`;
                     }
