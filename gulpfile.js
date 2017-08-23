@@ -18,7 +18,7 @@ const babelify = require("babelify");
 const source = require("vinyl-source-stream")
 const buffer = require("vinyl-buffer");
 
-gulp.task("clean-js", () => {
+gulp.task("clean", () => {
 
     return del.sync([
         "lib/dts",
@@ -28,7 +28,7 @@ gulp.task("clean-js", () => {
     ]);
 });
 
-gulp.task("tsc", ["clean-js"], () => {
+gulp.task("tsc", () => {
 
     const tsResult = gulp
         .src([
