@@ -917,16 +917,16 @@ export class Kuromaty {
 
                 // Price Pop Effect (testing)
                 for (i = 0; i < this._pricePops.length; i++) {
-                    this._pricePops[i][0] *= 0.972;
-                    if (this._pricePops[i][0] < 0.06) {
+                    this._pricePops[i][0] *= 0.95;
+                    if (this._pricePops[i][0] < 0.08) {
                         this._pricePops.splice(i, 1);
                         i--;
                         continue;
                     }
                     if (this._pricePops[i][5]) {
-                        this._pricePops[i][4] -= 0.2;
+                        this._pricePops[i][4] -= 0.15;
                     } else {
-                        this._pricePops[i][4] += 0.2;
+                        this._pricePops[i][4] += 0.15;
                     }
                 }
                 if (chart.tickDelta !== 0) {
@@ -939,7 +939,7 @@ export class Kuromaty {
                         chart.tickDelta > 0
                     ]);
 
-                    this._afs = Math.max(100, this._afs);
+                    this._afs = Math.max(50, this._afs);
                     chart.tickDelta = 0;
                 }
                 this.overlay.context.save();
@@ -951,7 +951,7 @@ export class Kuromaty {
                     this.overlay.context.fillText(
                         this._pricePops[i][1],
                         this._pricePops[i][3],
-                        Math.round(this._pricePops[i][4])
+                        this._pricePops[i][4]
                     );
                 }
                 this.overlay.context.restore();
