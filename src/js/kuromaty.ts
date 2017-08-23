@@ -135,6 +135,7 @@ export class Kuromaty {
     canvases: HTMLCanvasElement[];
     contexts: CanvasRenderingContext2D[];
 
+    private _dpr = window.devicePixelRatio;
     private _rootContainer: HTMLDivElement;
     private _chartContainer: HTMLDivElement;
     private _hasUpdated = false;
@@ -176,10 +177,9 @@ export class Kuromaty {
 
         container.appendChild(this._rootContainer);
 
-        this.resize();
         this._hasRemoved = false;
 
-        this._redraw();
+        this.resize();
     }
 
     remove() {
@@ -194,8 +194,11 @@ export class Kuromaty {
 
     resize() {
 
-        const w = this.canvasW = this._chartContainer.clientWidth;
-        const h = this.canvasH = this._chartContainer.clientHeight;
+        let w = this.canvasW = this._chartContainer.clientWidth;
+        let h = this.canvasH = this._chartContainer.clientHeight;
+
+        w *= this._dpr;
+        h *= this._dpr;
 
         this.canvases.forEach(canvas => {
             canvas.width = w;
@@ -203,6 +206,8 @@ export class Kuromaty {
         });
 
         this._hasUpdated = true;
+        
+        this._redraw();
     }
 
     zoom(delta: number) {
@@ -430,6 +435,12 @@ export class Kuromaty {
         if (this._afr) {
             cancelAnimationFrame(this._afr);
         }
+
+        // initial settings
+        this.contexts.forEach(context => {
+            context.scale(this._dpr, this._dpr);
+            context.imageSmoothingEnabled = false;
+        })
 
         const tick = () => {
 
