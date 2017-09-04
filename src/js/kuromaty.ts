@@ -1230,8 +1230,12 @@ export class Kuromaty {
         let i = Math.min(
             (barCount * period) + backCount - 1,
             mBars.length - 1
-        );
+        ) - (bars.length * (period / 60));
         for (; i >= backCount; i--) {
+            if (bars.length !== 0 && bars[0][0] > mBars[i][0]) {
+                continue;
+            }
+
             date = new Date(mBars[i][0]);
 
             if (
