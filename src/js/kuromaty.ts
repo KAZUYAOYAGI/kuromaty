@@ -61,6 +61,7 @@ export interface Chart {
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
     bars: Bar[];
+    hBars: Bar[];
     _bars: Bar[];
     ticks: Tick[];
     board: Board;
@@ -98,7 +99,7 @@ export class Kuromaty {
     barIndex = 0;
     cursorPrice = 0;
     pinnedPrices: number[] = [];
-    maxBarCount = 10000;
+    maxBarCount = 8200;
     hasDepleted = false;
     color: ColorOption = {
         bg: "#fafafa",
@@ -220,6 +221,13 @@ export class Kuromaty {
     update(index: number, bars: Bar[]) {
 
         this.charts[index].bars = bars;
+
+        this._hasUpdated = true;
+    }
+
+    updateHBars(index: number, hBars: Bar[]) {
+
+        this.charts[index].hBars = hBars;
 
         this._hasUpdated = true;
     }
@@ -381,6 +389,7 @@ export class Kuromaty {
                 canvas: document.createElement("canvas"),
                 context: null,
                 bars: [],
+                hBars: [],
                 _bars: [],
                 ticks: [],
                 board: null,
@@ -736,7 +745,10 @@ export class Kuromaty {
                     (period >= 15 && period < 30 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 3 === 0) ||
                     (period >= 30 && period < 60 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 6 === 0) ||
                     (period >= 60 && period < 120 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 12 === 0) ||
-                    (period >= 120 && barDate.getMinutes() % 60 === 0 && barDate.getHours() === 0)
+                    (period >= 120 && period < 240 && barDate.getHours() === 0) ||
+                    (period >= 240 && period < 360 && barDate.getHours() === 0 && barDate.getDate() % 2 === 0) ||
+                    (period >= 360 && period < 720 && barDate.getHours() === 0 && barDate.getDate() % 3 === 0) ||
+                    (period >= 720 && barDate.getHours() === 0 && barDate.getDate() % 7 === 0)
                 ) {
                     // vertical grid
                     this.grid.context.fillStyle = this.color.grid;
@@ -1153,11 +1165,62 @@ export class Kuromaty {
             });
         }
 
-        const bars: Bar[] = [],
-            mBars = chart.bars;
+        const bars: Bar[] = [];
+        let date;
+        let backCount = 0;
 
-        let date,
-            backCount = 0;
+        // use hBars (experimental)
+        if (period === 60) {
+            bars.push.apply(bars, chart.hBars.slice(start, start + barCount));
+        } else if (period >= 60) {
+            const hBars = chart.hBars;
+
+            if (start !== 0) {
+                date = new Date(hBars[0][0]);
+                backCount = start * (period / 60) + (date.getHours() % (period / 60)) - (period / 60);
+            }
+
+            let i = Math.min(
+                (barCount * (period / 60)) + backCount - 1,
+                hBars.length - 1
+            );
+            for (; i >= backCount; i--) {
+                date = new Date(hBars[i][0]);
+    
+                if (
+                    bars.length === 0 ||
+                    (
+                        date.getHours() % Math.ceil(period / 60) === 0 &&
+                        bars[0][0] < hBars[i][0]
+                    )
+                ) {
+                    bars.unshift([
+                        date.getTime(),
+                        hBars[i][1],
+                        hBars[i][2],
+                        hBars[i][3],
+                        hBars[i][4],
+                        hBars[i][5],
+                        hBars[i][6] || 0,
+                        hBars[i][7] || 0
+                    ]);
+                    continue;
+                }
+    
+                if (bars[0][2] < hBars[i][2]) {
+                    bars[0][2] = hBars[i][2];
+                }
+                if (bars[0][3] > hBars[i][3]) {
+                    bars[0][3] = hBars[i][3];
+                }
+                bars[0][4] = hBars[i][4];
+                bars[0][5] = hBars[i][5];
+                bars[0][6] = hBars[i][6] || 0;
+                bars[0][7] = hBars[i][7] || 0;
+            }
+        }
+
+        const mBars = chart.bars;
 
         if (start !== 0) {
             date = new Date(mBars[0][0]);
@@ -1166,7 +1229,7 @@ export class Kuromaty {
 
         let i = Math.min(
             (barCount * period) + backCount - 1,
-            chart.bars.length - 1
+            mBars.length - 1
         );
         for (; i >= backCount; i--) {
             date = new Date(mBars[i][0]);

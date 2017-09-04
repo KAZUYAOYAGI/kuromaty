@@ -64,6 +64,9 @@ header > div.pulldown > div {
 header > div.pulldown > div.pulldown-items {
     border-bottom: 1px solid #2f2f36;
 }
+header > div.pulldown div.item {
+    line-height: 25px;
+}
 header div.item.selected,
 header div.item:hover,
 header div.item:active {

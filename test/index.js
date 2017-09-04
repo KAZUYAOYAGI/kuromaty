@@ -187,12 +187,14 @@
     });
 
     // 足 (v2.26, v2.29)
-    [0, 1, 3, 5, 10, 15, 30, 60, 120].forEach(function (period) {
+    [0, 1, 3, 5, 10, 15, 30, 60, 120, 240, 360, 720, 1440].forEach(function (period) {
 
         var btn = $("<div class='item'></div>");
         
         if (period === 0) {
             btn.text("Tick");
+        } else if (period >= 1440) {
+            btn.text((period / 1440) + "日");
         } else if (period >= 60) {
             btn.text((period / 60) + "時間");
         } else {
@@ -230,28 +232,45 @@
     });
 
     // Extra OHLC (v2.27)
-    var getExtras = function (index, symbol) {
+    var getExtras = function (index, symbol, period) {
+
+        if (
+            kuromaty.timePeriod < 60 && period === "h" ||
+            kuromaty.timePeriod >= 60 && period === "m"
+        ) {
+            setTimeout(getExtras, 250, index, symbol, period);
+            return;
+        }
 
         if (kuromaty.hasDepleted === true) {
-            var before = kuromaty.charts[index].bars[kuromaty.charts[index].bars.length - 1][0];
+            var bars = period === "m" ? kuromaty.charts[index].bars : kuromaty.charts[index].hBars;
+            var before = Date.now();
+            if (bars[bars.length - 1]) {
+                before = bars[bars.length - 1][0];
+            }
             $.ajax(
                 "/api/ohlc?symbol=" + symbol +
-                "&before=" + before
+                "&before=" + before +
+                "&period=" + period
             ).done(function (ohlc) {
-                kuromaty.charts[index].bars = kuromaty.charts[index].bars.concat(ohlc);
-                kuromaty._hasUpdated = true;
 
-                if (ohlc.length > 0) {
-                    setTimeout(getExtras, 200, index, symbol);
+                if (period === "m") {
+                    kuromaty.update(index, bars.concat(ohlc));
+                } else if (period === "h") {
+                    kuromaty.updateHBars(index, bars.concat(ohlc));
                 }
-                
+
+                if (before !== ohlc[ohlc.length - 1][0]) {
+                    setTimeout(getExtras, 250, index, symbol, period);
+                }
             });
         } else {
-            setTimeout(getExtras, 200, index, symbol);
+            setTimeout(getExtras, 500, index, symbol, period);
         }
     };
     symbols.forEach(function (symbol) {
-        setTimeout(getExtras, 1000, symbols.indexOf(symbol), symbol);
+        setTimeout(getExtras, 1000, symbols.indexOf(symbol), symbol, "m");
+        setTimeout(getExtras, 1000, symbols.indexOf(symbol), symbol, "h");
     });
 
     // チャート初期化
