@@ -802,8 +802,8 @@ export class Kuromaty {
                     this.grid.context.fillText(
                         util.fixedDecimal(i, decimalPower),
                         chartW + 2,
-                        cp + 4,
-                        38
+                        cp + 5,
+                        39
                     );
 
                     lp = cp;
@@ -1480,8 +1480,8 @@ export class Kuromaty {
         ctx.fillText(
             util.fixedDecimal(price, this.options.decimalPower),
             w + 2,
-            y + 4,
-            38
+            y + 5,
+            39
         );
 
         ctx.restore();
@@ -1511,8 +1511,8 @@ export class Kuromaty {
         ctx.fillText(
             util.fixedDecimal(price, this.options.decimalPower),
             w + 2,
-            y + 4,
-            38
+            y + 5,
+            39
         );
 
         ctx.restore();
