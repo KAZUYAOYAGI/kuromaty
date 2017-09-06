@@ -143,7 +143,7 @@ export class Kuromaty {
     private _hasRemoved = true;
     private _afr: number;
     private _afs = 0;
-    private _pricePops: [number, string, string, number, number, boolean][] = [];
+    private _pricePops: [number, string, string, number, number, boolean, string][] = [];
     private _lastPointerdown: [number, number] = [0, 0];
     private _lastPointerButtons = 0;
     private _dragStartX: number;
@@ -581,8 +581,6 @@ export class Kuromaty {
             chart.context.fillStyle = this.color.border;
             chart.context.fillRect(chartW, 0, 1, chartH);
             chart.context.fillRect(0, chartH, chartW + 1, 1);
-
-            //console.log(chart.title, chart);
         }// pre
 
         this.grid.context.clearRect(0, 0, canvasW, canvasH);
@@ -767,6 +765,7 @@ export class Kuromaty {
                         timeStr = `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`;
                     }
                     this.grid.context.fillStyle = this.color.text;
+                    this.grid.context.font = "10px sans-serif";
                     this.grid.context.fillText(
                         timeStr,
                         barX - Math.ceil(this.options.barWidth / 2),
@@ -798,12 +797,13 @@ export class Kuromaty {
 
                     // text
                     this.grid.context.fillStyle = this.color.textWeak;
-                    this.grid.context.font = "10px Arial";
+                    this.grid.context.font = "11px sans-serif";
                     this.grid.context.textAlign = "left";
                     this.grid.context.fillText(
                         util.fixedDecimal(i, decimalPower),
                         chartW + 2,
-                        cp + 3.5
+                        cp + 4,
+                        38
                     );
 
                     lp = cp;
@@ -948,7 +948,8 @@ export class Kuromaty {
                         chart.tickDelta > 0 ? this.color.long : this.color.short,
                         chartW - 12,
                         chart.tickDelta > 0 ? (ltpp - 8) : (ltpp + 16),
-                        chart.tickDelta > 0
+                        chart.tickDelta > 0,
+                        Math.abs(chart.tickDelta) / chart.latest * 100 > 0.025 ? "bold 11px sans-serif" : "10px sans-serif"
                     ]);
 
                     this._afs = Math.max(50, this._afs);
@@ -956,14 +957,16 @@ export class Kuromaty {
                 }
                 this.overlay.context.save();
                 this.overlay.context.textAlign = "right";
-                this.overlay.context.font = "10px monospace";
                 for (i = 0; i < this._pricePops.length; i++) {
-                    this.overlay.context.globalAlpha = this._pricePops[i][0];
-                    this.overlay.context.fillStyle = this._pricePops[i][2];
+                    const [alpha, delta, fillStyle, posX, posY, isBuy, font] = this._pricePops[i];
+
+                    this.overlay.context.font = font;
+                    this.overlay.context.globalAlpha = alpha;
+                    this.overlay.context.fillStyle = fillStyle;
                     this.overlay.context.fillText(
-                        this._pricePops[i][1],
-                        this._pricePops[i][3],
-                        this._pricePops[i][4]
+                        delta,
+                        posX,
+                        posY
                     );
                 }
                 this.overlay.context.restore();
@@ -1040,15 +1043,16 @@ export class Kuromaty {
                 // Time Line
                 this.grid.context.fillStyle = this.color.grid;
                 this.grid.context.fillRect(
-                    pX - 10,
+                    pX - 13,
                     chartH,
-                    25,
+                    31,
                     20
                 );
                 // Time Text
                 barDate = new Date(chart._bars[i][0]);
                 this.grid.context.textAlign = "center";
                 this.grid.context.fillStyle = this.color.textStrong;
+                this.grid.context.font = "10px sans-serif";
                 this.grid.context.fillText(
                     `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`,
                     pX + this.options.barWidth / 2,
@@ -1472,11 +1476,12 @@ export class Kuromaty {
 
         ctx.textAlign = "left";
         ctx.fillStyle = textColor;
-        ctx.font = "10px Arial";
+        ctx.font = "11px sans-serif";
         ctx.fillText(
             util.fixedDecimal(price, this.options.decimalPower),
             w + 2,
-            y + 3.5
+            y + 4,
+            38
         );
 
         ctx.restore();
@@ -1502,11 +1507,12 @@ export class Kuromaty {
 
         ctx.textAlign = "left";
         ctx.fillStyle = color;
-        ctx.font = "10px Arial";
+        ctx.font = "11px sans-serif";
         ctx.fillText(
             util.fixedDecimal(price, this.options.decimalPower),
             w + 2,
-            y + 3.5
+            y + 4,
+            38
         );
 
         ctx.restore();
@@ -1523,7 +1529,7 @@ export class Kuromaty {
         ctx.fillStyle = this.color.textWeak;
         ctx.strokeStyle = this.color.bg;
         ctx.lineWidth = 2;
-        ctx.font = "10px Arial";
+        ctx.font = "10px sans-serif";
         ctx.strokeText(
             Math.round(value).toString(10),
             x - 12,
