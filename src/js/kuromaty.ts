@@ -1088,15 +1088,13 @@ export class Kuromaty {
             // Total Margin of Positions on Cursor (testing)
             if (!this._positions.isEmpty() && this.cursorPrice) {
                 const margin = Math.floor(this._positions.marginAgainst(this.cursorPrice));
+                const marginText = util.toStringWithSign(margin);
 
                 this.overlay.context.save();
                 this.overlay.context.textAlign = "left";
                 this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
-                this.overlay.context.fillText(
-                    util.toStringWithSign(margin),
-                    10,
-                    this.cursorY - 5
-                );
+                this.overlay.context.strokeText(marginText, 10, this.cursorY - 5);
+                this.overlay.context.fillText(marginText, 10, this.cursorY - 5);
                 this.overlay.context.restore();
             }
         } else {
@@ -1124,16 +1122,14 @@ export class Kuromaty {
         if (!this._positions.isEmpty()) {
             const chart = this.charts[0];
             const margin = Math.floor(this._positions.marginAgainst(chart.latest));
+            const marginText = `評価損益: ${util.toStringWithSign(margin)}`;
 
             this.overlay.context.save();
-            this.overlay.context.font = "11px monospace";
+            this.overlay.context.font = "bold 11px sans-serif";
             this.overlay.context.textAlign = "left";
             this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
-            this.overlay.context.fillText(
-                `評価損益: ${util.toStringWithSign(margin)}`,
-                10,
-                80
-            );
+            this.overlay.context.strokeText(marginText, 10, 80);
+            this.overlay.context.fillText(marginText, 10, 80);
             this.overlay.context.restore();
         }
 
