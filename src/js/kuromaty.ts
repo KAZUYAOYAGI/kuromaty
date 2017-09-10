@@ -1086,7 +1086,7 @@ export class Kuromaty {
             }
 
             // Total Margin of Positions on Cursor (testing)
-            if (!this._positions.isEmpty()) {
+            if (!this._positions.isEmpty() && this.cursorPrice) {
                 const margin = Math.floor(this._positions.marginAgainst(this.cursorPrice));
 
                 this.overlay.context.save();
