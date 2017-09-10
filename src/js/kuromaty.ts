@@ -493,7 +493,10 @@ export class Kuromaty {
             minDepth = Infinity,
             bar: Bar,
             barH = 0,
-            barDate: Date;
+            barDate: Date,
+            barDateMinutes: number,
+            barDateHours: number,
+            barDateDate: number;
 
         this.hasDepleted = false;
 
@@ -732,21 +735,24 @@ export class Kuromaty {
 
                 // bar date
                 barDate = new Date(bar[0]);
+                barDateMinutes = barDate.getMinutes();
+                barDateHours = barDate.getHours();
+                barDateDate = barDate.getDate();
 
                 // datetime
                 if (
                     (period === 0 && i % 10 === 0) ||
-                    (period >= 1 && period < 3 && barDate.getMinutes() % 15 === 0) ||
-                    (period >= 3 && period < 5 && barDate.getMinutes() % 30 === 0) ||
-                    (period >= 5 && period < 10 && barDate.getMinutes() % 60 === 0) ||
-                    (period >= 10 && period < 15 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 2 === 0) ||
-                    (period >= 15 && period < 30 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 3 === 0) ||
-                    (period >= 30 && period < 60 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 6 === 0) ||
-                    (period >= 60 && period < 120 && barDate.getMinutes() % 60 === 0 && barDate.getHours() % 12 === 0) ||
-                    (period >= 120 && period < 240 && barDate.getHours() === 0) ||
-                    (period >= 240 && period < 360 && barDate.getHours() === 0 && barDate.getDate() % 2 === 0) ||
-                    (period >= 360 && period < 720 && barDate.getHours() === 0 && barDate.getDate() % 3 === 0) ||
-                    (period >= 720 && barDate.getHours() === 0 && barDate.getDate() % 7 === 0)
+                    (period >= 1 && period < 3 && barDateMinutes % 15 === 0) ||
+                    (period >= 3 && period < 5 && barDateMinutes % 30 === 0) ||
+                    (period >= 5 && period < 10 && barDateMinutes % 60 === 0) ||
+                    (period >= 10 && period < 15 && barDateMinutes % 60 === 0 && barDateHours % 2 === 0) ||
+                    (period >= 15 && period < 30 && barDateMinutes % 60 === 0 && barDateHours % 3 === 0) ||
+                    (period >= 30 && period < 60 && barDateMinutes % 60 === 0 && barDateHours % 6 === 0) ||
+                    (period >= 60 && period < 120 && barDateMinutes % 60 === 0 && barDateHours % 12 === 0) ||
+                    (period >= 120 && period < 240 && barDateHours === 0) ||
+                    (period >= 240 && period < 360 && barDateHours === 0 && barDateDate % 2 === 0) ||
+                    (period >= 360 && period < 720 && barDateHours === 0 && barDateDate % 3 === 0) ||
+                    (period >= 720 && barDateHours === 0 && barDateDate % 7 === 0)
                 ) {
                     // vertical grid
                     this.grid.context.fillStyle = this.color.grid;
@@ -759,10 +765,10 @@ export class Kuromaty {
 
                     // time
                     let timeStr;
-                    if (barDate.getHours() === 0) {
-                        timeStr = `${barDate.getMonth() + 1}/${barDate.getDate()}'`;
+                    if (barDateHours === 0 && barDateMinutes === 0) {
+                        timeStr = `${barDate.getMonth() + 1}/${barDateDate}'`;
                     } else {
-                        timeStr = `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`;
+                        timeStr = `${barDateHours}:${util.zeroPadding(barDateMinutes, 2)}`;
                     }
                     this.grid.context.fillStyle = this.color.text;
                     this.grid.context.font = "10px sans-serif";
