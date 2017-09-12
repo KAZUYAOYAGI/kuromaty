@@ -861,26 +861,25 @@ export class Kuromaty {
                 // Board (testing)
                 if (chart.board) {
                     this.overlay.context.save();
-                    this.overlay.context.globalCompositeOperation = "lighter";
 
                     this.overlay.context.fillStyle = this.color.askOrder;
-                    for (i = 0; i < chart.board.asks.length; i++) {
-                        this.overlay.context.globalAlpha = Math.max(0.02, chart.board.asks[i].size / chart.boardMaxSize);
+                    for (i = 0; i < chart.board.asks.length - 1; i++) {
+                        this.overlay.context.globalAlpha = Math.min(1, chart.board.asks[i].size / chart.boardMaxSize + 0.12);
                         this.overlay.context.fillRect(
-                            chartW - 8,
-                            Math.round((chart.highest - chart.board.asks[i].price) * chart.ratio) + 2,
-                            8,
-                            -3
+                            chartW - 1,
+                            Math.round((chart.highest - chart.board.asks[i].price) * chart.ratio),
+                            -(Math.min(19, Math.ceil(chart.board.asks[i].size / chart.boardMaxSize * 19)) + 1),
+                            Math.min(-1, Math.round((chart.board.asks[i].price - chart.board.asks[i + 1].price) * chart.ratio))
                         );
                     }
                     this.overlay.context.fillStyle = this.color.bidOrder;
-                    for (i = 0; i < chart.board.bids.length; i++) {
-                        this.overlay.context.globalAlpha = Math.max(0.02, chart.board.bids[i].size / chart.boardMaxSize);
+                    for (i = 0; i < chart.board.bids.length - 1; i++) {
+                        this.overlay.context.globalAlpha = Math.min(1, chart.board.bids[i].size / chart.boardMaxSize + 0.12);
                         this.overlay.context.fillRect(
-                            chartW - 8,
-                            Math.round((chart.highest - chart.board.bids[i].price) * chart.ratio) - 1,
-                            8,
-                            3
+                            chartW - 1,
+                            Math.round((chart.highest - chart.board.bids[i].price) * chart.ratio),
+                            -(Math.min(19, Math.ceil(chart.board.bids[i].size / chart.boardMaxSize * 19)) + 1),
+                            Math.max(1, Math.round((chart.board.bids[i].price - chart.board.bids[i + 1].price) * chart.ratio))
                         );
                     }
 
