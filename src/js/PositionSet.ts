@@ -1,14 +1,15 @@
 /*!
     Copyright 2017 Kuromatch
 */
-
 "use strict";
+
 import { Position, PositionLike } from "./Position";
 import { Decimal } from "decimal.js-light";
 
 export class PositionSet {
-    private positions = {};
-    private _size = 0;
+    private positions: { [priceKey: string]: Position } = {};
+    private _size = new Decimal(0);
+    private _length = 0;
 
     constructor(positions?: PositionLike[]) {
         if (positions) {
@@ -18,7 +19,14 @@ export class PositionSet {
         }
     }
 
+    get size() {
+        return this._size.toNumber();
+    }
+
     add(position: Position) {
+
+        this._size = this._size.plus(position.size);
+
         const key = position.price.toString();
         const existed = this.positions[key];
 
@@ -28,7 +36,7 @@ export class PositionSet {
         }
 
         this.positions[key] = position;
-        this._size++;
+        this._length++;
     }
 
     forEach(callbackFn) {
@@ -37,6 +45,7 @@ export class PositionSet {
     }
 
     marginAgainst(price: number) {
+
         let margin = 0;
         this.forEach(pos => {
             margin += pos.marginAgainst(price);
@@ -46,6 +55,6 @@ export class PositionSet {
     }
 
     isEmpty() {
-        return this._size === 0;
+        return this._length === 0;
     }
 }

@@ -1,7 +1,6 @@
 /*!
     Copyright 2017 Kuromatch
 */
-
 "use strict";
 
 import { Decimal } from "decimal.js-light";
@@ -9,18 +8,21 @@ import { Decimal } from "decimal.js-light";
 export type Side = "L" | "S";
 
 export interface PositionLike {
-    price: number;
+    time: number;
+    price: number | string;
     size: number | string;
     side: Side;
 }
 
 export class Position {
+    readonly time: number;
     readonly price: Decimal;
     readonly size: Decimal;
     readonly side: Side;
     private _sideSign: Decimal;
 
     constructor(position: PositionLike) {
+        this.time = position.time;
         this.price = new Decimal(position.price);
         this.size = new Decimal(position.size);
         this.side = position.side;
@@ -32,6 +34,7 @@ export class Position {
     }
 
     merge(position: Position) {
+        
         if (!this.price.equals(position.price)) {
             throw new Error("Can not merge different price positions.");
         }
@@ -44,4 +47,3 @@ export class Position {
         (<any>this).size = this.size.plus(position.size);
     }
 }
-

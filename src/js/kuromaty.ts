@@ -4,6 +4,8 @@
 import * as util from "./util";
 import { Position as _Position, PositionLike } from "./Position";
 import { PositionSet } from "./PositionSet";
+import { Order as _Order, OrderLike } from "./Order";
+import { OrderSet } from "./OrderSet";
 
 export { Side as PositionSide } from "./Position";
 
@@ -150,6 +152,7 @@ export class Kuromaty {
     private _dragStartI: number;
     private _decimal: number;
     private _positions: PositionSet = new PositionSet();
+    private _orders: OrderSet = new OrderSet();
 
     constructor(container?: Element, public options: Options = {}) {
 
@@ -345,12 +348,8 @@ export class Kuromaty {
         this._positions = new PositionSet(positions);
     }
 
-    /**
-     * @deprecated
-     * @param {Position[]} positions
-     */
-    set positions(positions: PositionLike[]) {
-        this.setPositions(positions);
+    setOrders(orders: OrderLike[]) {
+        this._orders = new OrderSet(orders);
     }
 
     private _create() {
@@ -912,6 +911,18 @@ export class Kuromaty {
                     );
                 });
 
+                // Orders (testing)
+                this._orders.forEach(order => {
+                    this._drawOrderMarker(
+                        this.overlay.context,
+                        0,
+                        Math.round((chart.highest - order.price) * chart.ratio),
+                        chartW,
+                        order,
+                        chart.latest
+                    );
+                });
+
                 // LTP
                 let ltpp = Math.round((chart.highest - chart.latest) * chart.ratio);
 
@@ -1096,10 +1107,26 @@ export class Kuromaty {
                 const marginText = util.toStringWithSign(margin);
 
                 this.overlay.context.save();
+
+                this.overlay.context.globalAlpha = 0.8;
+                this.overlay.context.fillStyle = this.color.bg;
+                this.overlay.context.fillRect(
+                    6,
+                    this.cursorY - 2,
+                    60,
+                    -13
+                );
+
+                this.overlay.context.globalAlpha = 1;
                 this.overlay.context.textAlign = "left";
                 this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
-                this.overlay.context.strokeText(marginText, 10, this.cursorY - 5);
-                this.overlay.context.fillText(marginText, 10, this.cursorY - 5);
+                this.overlay.context.fillText(
+                    marginText,
+                    10,
+                    this.cursorY - 5,
+                    56
+                );
+                
                 this.overlay.context.restore();
             }
         } else {
@@ -1127,7 +1154,7 @@ export class Kuromaty {
         if (!this._positions.isEmpty()) {
             const chart = this.charts[0];
             const margin = Math.floor(this._positions.marginAgainst(chart.latest));
-            const marginText = `評価損益: ${util.toStringWithSign(margin)}`;
+            const marginText = `建玉: ${this._positions.size}  評価損益: ${util.toStringWithSign(margin)}`;
 
             this.overlay.context.save();
             this.overlay.context.font = "bold 11px sans-serif";
@@ -1578,6 +1605,46 @@ export class Kuromaty {
         ctx.fillStyle = color;
         ctx.fillText(
             `${position.size} ${position.side}, ${util.toStringWithSign(margin)}`,
+            x + 6,
+            y - 5,
+            76
+        );
+
+        ctx.restore();
+    }
+
+    private _drawOrderMarker(ctx: CanvasRenderingContext2D,
+        x: number, y: number, w: number, order: _Order, ltp: number) {
+
+        const color = order.side === "L" ? this.color.long : this.color.short;
+
+        this._drawPriceTag(
+            ctx,
+            x,
+            y,
+            w,
+            order.price.toNumber(),
+            color,
+            "#ffffff",
+            [5, 2]
+        );
+
+        ctx.save();
+
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = this.color.bg;
+        ctx.fillRect(
+            x + 4,
+            y - 2,
+            80,
+            -13
+        );
+
+        ctx.globalAlpha = 1;
+        ctx.textAlign = "left";
+        ctx.fillStyle = color;
+        ctx.fillText(
+            `${order.size}/${order.origSize} ${order.side} ...`,
             x + 6,
             y - 5,
             76

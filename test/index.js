@@ -340,8 +340,13 @@
             var message = JSON.parse(event.data);
             if (message.kind === "positions") {
                 kuromaty.setPositions(message.body);
+            } else if (message.kind === "orders") {
+                kuromaty.setOrders(message.body);
             }
         }, false);
+
+        window.postMessage('{"kind":"positions","body":[{"side":"L","price":"445000","size":"0.25","margin":11}]}', "*");
+        window.postMessage('{"kind":"orders","body":[{"time":1505535342275,"side":"S","price":"424000","origSize":"0.1","size":"0.1"}]}', "*");
     }
 
     // 板情報 (テスト中)
@@ -360,7 +365,7 @@
                 kuromaty.updateBoard(0, kuro.stat.board);
             }
 
-            setTimeout(boardUpdater, 1000);
+            setTimeout(boardUpdater, 500);
         };
         setTimeout(boardUpdater, 1000);
     }
