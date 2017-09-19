@@ -345,8 +345,8 @@
             }
         }, false);
 
-        window.postMessage('{"kind":"positions","body":[{"side":"L","price":"445000","size":"0.25","margin":11}]}', "*");
-        window.postMessage('{"kind":"orders","body":[{"time":1505535342275,"side":"S","price":"424000","origSize":"0.1","size":"0.1"}]}', "*");
+        window.postMessage('{"kind":"positions","body":[{"time":1505831495637,"side":"S","price":"445000","size":"0.001","margin":45},{"time":1505836555637,"side":"S","price":"449000","size":"0.01","margin":449}]}', "*");
+        window.postMessage('{"kind":"orders","body":[{"time":1505836364633,"type":"指値","side":"S","price":"449000","origSize":"0.01","size":"0.01"},{"time":1505831416633,"type":"IFD","side":"L/S","price":"445000","origSize":"0.002","size":"0.001"},{"time":1505831348633,"type":"IFD","side":"L/S","price":"442141","origSize":"0.002","size":"0.002"}]}', "*");
     }
 
     // 板情報 (テスト中)

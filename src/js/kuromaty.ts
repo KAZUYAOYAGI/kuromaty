@@ -1522,7 +1522,8 @@ export class Kuromaty {
 
     private _drawPriceTag(ctx: CanvasRenderingContext2D,
         x: number, y: number, w: number, price: number,
-        color: string, textColor: string, lineDash: number[], tagColor?: string) {
+        color: string, textColor: string, lineDash: number[],
+        tagColor?: string, alpha?: number) {
 
         this._drawBorder(ctx, x, y + 0.5, w - 5, color, lineDash);
 
@@ -1530,6 +1531,7 @@ export class Kuromaty {
 
         ctx.save();
 
+        ctx.globalAlpha = alpha || 1;
         ctx.fillStyle = tagColor || color;
         ctx.beginPath();
         ctx.moveTo(w - 5, y);
@@ -1626,7 +1628,7 @@ export class Kuromaty {
             position.price.toNumber(),
             color,
             "#ffffff",
-            [5, 2, 2]
+            [1, 2]
         );
 
         ctx.save();
@@ -1656,7 +1658,15 @@ export class Kuromaty {
     private _drawOrderMarker(ctx: CanvasRenderingContext2D,
         x: number, y: number, w: number, order: _Order, ltp: number) {
 
-        const color = order.side === "L" ? this.color.long : this.color.short;
+        let color = this.color.text;
+        switch (order.side) {
+            case "L":
+                color = this.color.long;
+                break;
+            case "S":
+                color = this.color.short;
+                break;
+        }
 
         this._drawPriceTag(
             ctx,
@@ -1666,7 +1676,9 @@ export class Kuromaty {
             order.price.toNumber(),
             color,
             "#ffffff",
-            [5, 2]
+            [1, 5],
+            null,
+            0.5
         );
 
         ctx.save();
@@ -1684,7 +1696,7 @@ export class Kuromaty {
         ctx.textAlign = "left";
         ctx.fillStyle = color;
         ctx.fillText(
-            `${order.size}/${order.origSize} ${order.side} ...`,
+            `${order.size}/${order.origSize} ${order.side} ${order.type}`,
             x + 6,
             y - 5,
             76

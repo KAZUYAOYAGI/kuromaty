@@ -5,7 +5,7 @@
 
 import { Decimal } from "decimal.js-light";
 
-export type Side = "L" | "S";
+export type Side = "L" | "S" | "L/S";
 
 export interface OrderLike {
     time: number;
@@ -13,6 +13,7 @@ export interface OrderLike {
     origSize: number | string;
     size: number | string;
     side: Side;
+    type: string;
 }
 
 export class Order {
@@ -21,7 +22,7 @@ export class Order {
     readonly origSize: Decimal;
     readonly size: Decimal;
     readonly side: Side;
-    private _sideSign: Decimal;
+    readonly type: string;
 
     constructor(order: OrderLike) {
         this.time = order.time;
@@ -29,7 +30,7 @@ export class Order {
         this.origSize = new Decimal(order.origSize);
         this.size = new Decimal(order.size);
         this.side = order.side;
-        this._sideSign = new Decimal(order.side === "S" ? 1 : -1);
+        this.type = order.type;
     }
 
     merge(order: Order) {
