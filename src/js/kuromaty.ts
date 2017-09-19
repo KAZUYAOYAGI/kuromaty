@@ -154,6 +154,8 @@ export class Kuromaty {
     private _positions: PositionSet = new PositionSet();
     private _orders: OrderSet = new OrderSet();
 
+    private __keydownHandler = this._keydownHandler.bind(this);
+
     constructor(container?: Element, public options: Options = {}) {
 
         if (typeof options.chartCount !== "number") {
@@ -187,6 +189,8 @@ export class Kuromaty {
     }
 
     remove() {
+
+        this._removeListeners();
 
         this._rootContainer.parentNode.removeChild(this._rootContainer);
 
@@ -436,6 +440,18 @@ export class Kuromaty {
         this.canvases.forEach(canvas => {
             this._chartContainer.appendChild(canvas);
         });
+
+        this._addListeners();
+    }
+
+    private _addListeners() {
+
+        window.addEventListener("keydown", this.__keydownHandler);
+    }
+
+    private _removeListeners() {
+
+        window.removeEventListener("keydown", this.__keydownHandler);
     }
 
     private _redraw() {
@@ -1304,6 +1320,30 @@ export class Kuromaty {
         }
 
         return bars.slice(0, barCount);
+    }
+
+    private _keydownHandler(ev: KeyboardEvent) {
+
+        const active = document.activeElement && document.activeElement.tagName;
+
+        if (active !== "BODY" && active !== "DIV" && active !== "BUTTON") { return; }
+        if (window.getSelection().toString() !== "") { return; }
+
+        let activated = false;
+
+        switch (ev.keyCode) {
+            // Space
+            case 32:
+                activated = true;
+                this.barIndex = 0;
+                this._hasUpdated = true;
+                break;
+        }
+
+        if (activated) {
+            ev.stopPropagation();
+            ev.preventDefault();
+        }
     }
 
     private _contextmenuHandler(ev: MouseEvent) {
