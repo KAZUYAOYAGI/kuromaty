@@ -77,7 +77,11 @@ gulp.task("browserify", ["tsc"], () => {
         entries: "./lib/es6/kuromaty.js",
         extensions: [".js"]
     })
-        .transform("babelify", { presets: ["es2015"], sourceMaps: true })
+        .transform("babelify", {
+            global: true,
+            presets: ["es2015"],
+            sourceMaps: true
+        })
         .bundle()
         .pipe(source("kuromaty.js"))
         .pipe(buffer())

@@ -6,6 +6,7 @@ import { Position as _Position, PositionLike } from "./Position";
 import { PositionSet } from "./PositionSet";
 import { Order as _Order, OrderLike } from "./Order";
 import { OrderSet } from "./OrderSet";
+import flagrate from "flagrate/lib/es6/flagrate";
 
 export { Side as PositionSide } from "./Position";
 
@@ -1110,7 +1111,7 @@ export class Kuromaty {
                     20
                 );
                 this.overlay.context.fillText(
-                    "[価格マーカー] 左クリックで追加・削除 / 右クリックで全消去",
+                    "[価格マーカー] 左クリックで追加・削除",
                     10,
                     40
                 );
@@ -1351,7 +1352,26 @@ export class Kuromaty {
         ev.stopPropagation();
         ev.preventDefault();
 
-        this.pinnedPrices = [];
+        const price = this.cursorPrice;
+
+        new flagrate.ContextMenu({
+            target: this._rootContainer,
+            items: [
+                {
+                    label: `価格をコピー: ${price}`,
+                    onSelect: () => {
+                        util.copyTextToClipboard(price.toString(10));
+                    }
+                },
+                {
+                    label: "価格マーカー全消去",
+                    onSelect: () => {
+                        this.pinnedPrices = [];
+                        this._hasUpdated = true;
+                    }
+                }
+            ]
+        }).open(ev);
     }
 
     private _pointerdownHandler(ev: PointerEvent) {
@@ -1380,6 +1400,10 @@ export class Kuromaty {
                 default:
                     buttons = ev.which;
             }
+        }
+
+        if (buttons === 2) {
+            return;
         }
 
         this._lastPointerdown = [offsetX, offsetY];
@@ -1417,8 +1441,6 @@ export class Kuromaty {
                         this.pinnedPrices.splice(pinnedPriceIndex, 1);
                     }
                 }
-            } else if (this._lastPointerButtons === 2) {
-                this.pinnedPrices = [];
             }
         }
 
