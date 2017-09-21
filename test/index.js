@@ -351,11 +351,75 @@
 
     // 板情報 (テスト中)
     if (kuro.options["板表示"] && /^CC_/.test(symbols[0]) === false) {
-        kuro.pubnub = new PUBNUB.ws("wss://pubsub.pubnub.com//sub-c-52a9ab50-291b-11e5-baaa-0619f8945a4f/lightning_board_snapshot_" + symbols[0]);
         kuro.stat.boardUpdated = false;
-        kuro.pubnub.onmessage = function (evt) {
-            kuro.stat.board = evt.data;
+        kuro.pubnubBoard = new PUBNUB.ws("wss://pubsub.pubnub.com//sub-c-52a9ab50-291b-11e5-baaa-0619f8945a4f/lightning_board_" + symbols[0]);
+        kuro.pubnubBoard.onmessage = function (evt) {
+
+            var book = evt.data;
+
+            var i, j, price, size, find;
+            for (i = 0; i < book.asks.length; i++) {
+                price = book.asks[i].price;
+                size = book.asks[i].size;
+                find = false;
+                for (j = 0; j < kuro.stat.board.asks.length; j++) {
+                    if (kuro.stat.board.asks[j].price === price) {
+                        find = true;
+                        if (size === 0) {
+                            kuro.stat.board.asks.splice(j, 1);
+                            break;
+                        }
+                        kuro.stat.board.asks[j].size = size;
+                        break;
+                    }
+                }
+                if (find === false && size !== 0) {
+                    kuro.stat.board.asks.push({
+                        price: price,
+                        size: size
+                    });
+                }
+            }
+            for (i = 0; i < book.bids.length; i++) {
+                price = book.bids[i].price;
+                size = book.bids[i].size;
+                find = false;
+                for (j = 0; j < kuro.stat.board.bids.length; j++) {
+                    if (kuro.stat.board.bids[j].price === price) {
+                        find = true;
+                        if (size === 0) {
+                            kuro.stat.board.bids.splice(j, 1);
+                            break;
+                        }
+                        kuro.stat.board.bids[j].size = size;
+                        break;
+                    }
+                }
+                if (find === false && size !== 0) {
+                    kuro.stat.board.bids.push({
+                        price: price,
+                        size: size
+                    });
+                }
+            }
+
+            kuro.stat.board.asks.sort(function (a, b) {
+                return a.price - b.price;
+            });
+            kuro.stat.board.bids.sort(function (a, b) {
+                return b.price - a.price;
+            });
+
             kuro.stat.boardUpdated = true;
+
+            if (kuro.stat.connected === false) {
+                if (kuro.stat.board.asks[0]) {
+                    kuromaty.charts[0].askPrice = kuro.stat.board.asks[0].price;
+                }
+                if (kuro.stat.board.bids[0]) {
+                    kuromaty.charts[0].bidPrice = kuro.stat.board.bids[0].price;
+                }
+            }
         };
 
         var boardUpdater = function () {
