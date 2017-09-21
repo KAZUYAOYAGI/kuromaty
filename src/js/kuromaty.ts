@@ -1429,17 +1429,22 @@ export class Kuromaty {
             target: this._rootContainer,
             items: [
                 {
-                    label: `価格をコピー: ${price}`,
+                    labelHTML: `価格をコピー: ${price}`,
                     onSelect: () => {
                         util.copyTextToClipboard(price.toString(10));
                     }
                 },
+                <any>"--",
                 {
                     label: "価格マーカー全消去",
                     onSelect: () => {
                         this.pinnedPrices = [];
                         this._hasUpdated = true;
                     }
+                },
+                <any>"--",
+                {
+                    label: "キャンセル"
                 }
             ]
         }).open(ev);
