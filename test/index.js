@@ -349,6 +349,20 @@
         window.postMessage('{"kind":"orders","body":[{"time":1505836364633,"type":"指値","side":"S","price":"449000","origSize":"0.01","size":"0.01"},{"time":1505831416633,"type":"IFD","side":"L/S","price":"445000","origSize":"0.002","size":"0.001"},{"time":1505831348633,"type":"IFD","side":"L/S","price":"442141","origSize":"0.002","size":"0.002"}]}', "*");
     }
 
+    // 注文 (テスト中)
+    if (/Chrome/.test(navigator.userAgent) === true) {
+        kuromaty.options.quickOrder = true;
+        kuromaty.options.quickOrderHandler = function (order) {
+
+            console.log("quickOrderHandler", order);
+
+            window.parent.postMessage(JSON.stringify({
+                kind: "order",
+                body: order
+            }), "*");
+        };
+    }
+
     // 板情報 (テスト中)
     if (kuro.options["板表示"] && /^CC_/.test(symbols[0]) === false) {
         kuro.stat.boardUpdated = false;

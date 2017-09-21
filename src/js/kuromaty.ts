@@ -23,6 +23,13 @@ export interface Options {
     barWidth?: number;
     barMargin?: number;
     decimalPower?: number;
+    quickOrder?: boolean;
+    quickOrderHandler?: (order: QuickOrder) => void;
+}
+
+export interface QuickOrder {
+    price: number;
+    type: "limit" | "stop-limit";
 }
 
 export interface ColorOption {
@@ -1425,15 +1432,46 @@ export class Kuromaty {
 
         const price = this.cursorPrice;
 
+        const quickOrderItems = [];
+
+        if (this.options.quickOrder) {
+            quickOrderItems.push(
+                {
+                    label: "[beta] 指値注文...",
+                    onSelect: () => {
+                        this.options.quickOrderHandler({
+                            price: price,
+                            type: "limit"
+                        });
+                    }
+                },
+                {
+                    label: "[beta] STOP-LIMIT 注文...",
+                    onSelect: () => {
+                        this.options.quickOrderHandler({
+                            price: price,
+                            type: "stop-limit"
+                        });
+                    }
+                }
+            );
+        }
+
         new flagrate.ContextMenu({
             target: this._rootContainer,
             items: [
                 {
-                    labelHTML: `価格をコピー: ${price}`,
+                    label: `${price}`,
+                    isDisabled: true
+                },
+                <any>"--",
+                {
+                    labelHTML: "価格をコピー",
                     onSelect: () => {
                         util.copyTextToClipboard(price.toString(10));
                     }
                 },
+                ...quickOrderItems,
                 <any>"--",
                 {
                     label: "価格マーカー全消去",
