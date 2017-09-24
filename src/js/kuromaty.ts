@@ -1173,25 +1173,27 @@ export class Kuromaty {
                 );
 
                 // Volume
-                this.overlay.context.globalAlpha = 0.8;
-                this.overlay.context.fillStyle = this.color.bg;
-                this.overlay.context.fillRect(
-                    pX + barW,
-                    (chart.highest - chart.lowestPrice) * chart.ratio + 2,
-                    50,
-                    13
-                );
+                if (chart._bars[i + 1]) {
+                    this.overlay.context.globalAlpha = 0.8;
+                    this.overlay.context.fillStyle = this.color.bg;
+                    this.overlay.context.fillRect(
+                        pX + barW,
+                        (chart.highest - chart.lowestPrice) * chart.ratio + 2,
+                        50,
+                        13
+                    );
 
-                this.overlay.context.globalAlpha = 1;
-                this.overlay.context.textAlign = "left";
-                this.overlay.context.font = "10px sans-serif";
-                this.overlay.context.fillStyle = this.color.volume;
-                this.overlay.context.fillText(
-                    (Math.abs(Math.round(chart._bars[i + 1][5] - chart._bars[i][5]))).toString(10),
-                    pX + barW + 2,
-                    (chart.highest - chart.lowestPrice) * chart.ratio + 12,
-                    46
-                );
+                    this.overlay.context.globalAlpha = 1;
+                    this.overlay.context.textAlign = "left";
+                    this.overlay.context.font = "10px sans-serif";
+                    this.overlay.context.fillStyle = this.color.volume;
+                    this.overlay.context.fillText(
+                        (Math.abs(Math.round(chart._bars[i + 1][5] - chart._bars[i][5]))).toString(10),
+                        pX + barW + 2,
+                        (chart.highest - chart.lowestPrice) * chart.ratio + 12,
+                        46
+                    );
+                }
             }
 
             this.overlay.context.restore();
