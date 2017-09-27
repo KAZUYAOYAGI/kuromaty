@@ -12,9 +12,26 @@ export { Side as PositionSide } from "./Position";
 
 /** time, open, high, low, close, volume, askDepth, bidDepth */
 export type Bar = [number, number, number, number, number, number, number, number];
+const enum BarColumn {
+    Time,
+    Open,
+    High,
+    Low,
+    Close,
+    Volume,
+    AskDepth,
+    BidDepth
+}
 
 /** time, ltp, volume, askDepth, bidDepth */
 export type Tick = [number, number, number, number, number];
+const enum TickColumn {
+    Time,
+    Ltp,
+    Volume,
+    AskDepth,
+    BidDepth
+}
 
 export interface Options {
     chartCount?: number;
@@ -254,10 +271,10 @@ export class Kuromaty {
         const chart = this.charts[index];
 
         chart.tickDelta = 0;
-        if (chart.ticks[0] && chart.bars[0][4] !== tick[1]) {
-            chart.tickDelta = tick[1] - chart.bars[0][4];
+        if (chart.ticks[0] && chart.bars[0][BarColumn.Close] !== tick[TickColumn.Ltp]) {
+            chart.tickDelta = tick[TickColumn.Ltp] - chart.bars[0][BarColumn.Close];
         }
-        if (!chart.ticks[0] || 1000 < tick[0] - chart.ticks[0][0]) {
+        if (!chart.ticks[0] || 1000 < tick[TickColumn.Time] - chart.ticks[0][TickColumn.Time]) {
             chart.ticks.unshift(tick);
             if (chart.ticks.length > 250) {
                 chart.ticks.pop();
@@ -266,36 +283,36 @@ export class Kuromaty {
 
         let lastTime = Date.now() - 1000 * 60;
         if (chart.bars.length > 0) {
-            lastTime = chart.bars[0][0];
+            lastTime = chart.bars[0][BarColumn.Time];
         }
 
         const bar = chart.bars[0];
 
-        const time = tick[0];
+        const time = tick[TickColumn.Time];
         if (!bar || new Date(lastTime).getMinutes() !== new Date(time).getMinutes()) {
             const delta = Math.floor((time - lastTime) / 1000 / 60);
             for (let i = delta; i > 0; i--) {
                 if (i === 1) {
                     chart.bars.unshift([
-                        new Date(tick[0]).setSeconds(0, 0),
-                        tick[1],
-                        tick[1],
-                        tick[1],
-                        tick[1],
-                        tick[2],
-                        tick[3],
-                        tick[4]
+                        new Date(tick[TickColumn.Time]).setSeconds(0, 0),
+                        tick[TickColumn.Ltp],
+                        tick[TickColumn.Ltp],
+                        tick[TickColumn.Ltp],
+                        tick[TickColumn.Ltp],
+                        tick[TickColumn.Volume],
+                        tick[TickColumn.AskDepth],
+                        tick[TickColumn.BidDepth]
                     ]);
                 } else {
                     chart.bars.unshift([
-                        new Date(tick[0]).setSeconds(0, 0) - (1000 * 60 * (i - 1)),
-                        chart.ticks[0][1],
-                        chart.ticks[0][1],
-                        chart.ticks[0][1],
-                        chart.ticks[0][1],
-                        chart.ticks[0][2],
-                        chart.ticks[0][3],
-                        chart.ticks[0][4]
+                        new Date(tick[TickColumn.Time]).setSeconds(0, 0) - (1000 * 60 * (i - 1)),
+                        chart.ticks[0][TickColumn.Ltp],
+                        chart.ticks[0][TickColumn.Ltp],
+                        chart.ticks[0][TickColumn.Ltp],
+                        chart.ticks[0][TickColumn.Ltp],
+                        chart.ticks[0][TickColumn.Volume],
+                        chart.ticks[0][TickColumn.AskDepth],
+                        chart.ticks[0][TickColumn.BidDepth]
                     ]);
                 }
 
@@ -304,16 +321,16 @@ export class Kuromaty {
                 }
             }
         } else {
-            if (bar[2] < tick[1]) {
-                bar[2] = tick[1];
+            if (bar[BarColumn.High] < tick[TickColumn.Ltp]) {
+                bar[BarColumn.High] = tick[TickColumn.Ltp];
             }
-            if (bar[3] > tick[1]) {
-                bar[3] = tick[1];
+            if (bar[BarColumn.Low] > tick[TickColumn.Ltp]) {
+                bar[BarColumn.Low] = tick[TickColumn.Ltp];
             }
-            bar[4] = tick[1];
-            bar[5] = tick[2];
-            bar[6] = tick[3];
-            bar[7] = tick[4];
+            bar[BarColumn.Close] = tick[TickColumn.Ltp];
+            bar[BarColumn.Volume] = tick[TickColumn.Volume];
+            bar[BarColumn.AskDepth] = tick[TickColumn.AskDepth];
+            bar[BarColumn.BidDepth] = tick[TickColumn.BidDepth];
         }
 
         this._hasUpdated = true;
@@ -560,26 +577,26 @@ export class Kuromaty {
                 if (!bar) {
                     break;
                 }
-                if (highest < bar[2]) {
-                    highest = bar[2];
+                if (highest < bar[BarColumn.High]) {
+                    highest = bar[BarColumn.High];
                 }
-                if (lowest > bar[3]) {
-                    lowest = bar[3];
+                if (lowest > bar[BarColumn.Low]) {
+                    lowest = bar[BarColumn.Low];
                 }
-                if (maxVolume < Math.abs(chart._bars[i + 1][5] - bar[5])) {
-                    maxVolume = Math.abs(chart._bars[i + 1][5] - bar[5]);
+                if (maxVolume < Math.abs(chart._bars[i + 1][BarColumn.Volume] - bar[BarColumn.Volume])) {
+                    maxVolume = Math.abs(chart._bars[i + 1][BarColumn.Volume] - bar[BarColumn.Volume]);
                 }
-                if (maxDepth < bar[6]) {
-                    maxDepth = bar[6];
+                if (maxDepth < bar[BarColumn.AskDepth]) {
+                    maxDepth = bar[BarColumn.AskDepth];
                 }
-                if (minDepth > bar[6]) {
-                    minDepth = bar[6];
+                if (minDepth > bar[BarColumn.AskDepth]) {
+                    minDepth = bar[BarColumn.AskDepth];
                 }
-                if (maxDepth < bar[7]) {
-                    maxDepth = bar[7];
+                if (maxDepth < bar[BarColumn.BidDepth]) {
+                    maxDepth = bar[BarColumn.BidDepth];
                 }
-                if (minDepth > bar[7]) {
-                    minDepth = bar[7];
+                if (minDepth > bar[BarColumn.BidDepth]) {
+                    minDepth = bar[BarColumn.BidDepth];
                 }
             }
 
@@ -587,7 +604,7 @@ export class Kuromaty {
                 return;
             }
 
-            chart.latest = chart.bars[0][4];
+            chart.latest = chart.bars[0][BarColumn.Close];
             chart.highestPrice = highest;
             chart.lowestPrice = lowest;
             chart.highestPricePrinted = false;
@@ -645,7 +662,7 @@ export class Kuromaty {
                         barX - this.options.barWidth,
                         0,
                         barW,
-                        Math.round((bar[6] - chart.minDepth) * chart.depthRatio)
+                        Math.round((bar[BarColumn.AskDepth] - chart.minDepth) * chart.depthRatio)
                     );
 
                     ctx.fillStyle = i === 0 && chartI < 1 ? this.color.bidDepthLast : this.color.bidDepth;
@@ -653,7 +670,7 @@ export class Kuromaty {
                         barX - this.options.barWidth,
                         chartH,
                         barW,
-                        - Math.round((bar[7] - chart.minDepth) * chart.depthRatio)
+                        - Math.round((bar[BarColumn.BidDepth] - chart.minDepth) * chart.depthRatio)
                     );
                 }
 
@@ -663,27 +680,27 @@ export class Kuromaty {
                     barX - Math.ceil(this.options.barWidth / 2),
                     chartH,
                     1,
-                    - Math.abs(Math.round((chart._bars[i + 1][5] - bar[5]) * chart.volumeRatio))
+                    - Math.abs(Math.round((chart._bars[i + 1][BarColumn.Volume] - bar[BarColumn.Volume]) * chart.volumeRatio))
                 );
 
                 if (period !== 0) {
                     // bar height
-                    barH = Math.round((bar[1] - bar[4]) * chart.ratio);
+                    barH = Math.round((bar[BarColumn.Open] - bar[BarColumn.Close]) * chart.ratio);
 
                     // candlestick
-                    ctx.fillStyle = bar[1] > bar[4] ? this.color.short : this.color.long;
+                    ctx.fillStyle = bar[BarColumn.Open] > bar[BarColumn.Close] ? this.color.short : this.color.long;
                     ctx.fillRect(
                         barX - this.options.barWidth,
-                        Math.round((chart.highest - bar[1]) * chart.ratio),
+                        Math.round((chart.highest - bar[BarColumn.Open]) * chart.ratio),
                         this.options.barWidth,
                         barH === 0 ? 1 : barH
                     );
                     // candlestick (hige)
                     ctx.fillRect(
                         barX - Math.ceil(this.options.barWidth / 2),
-                        Math.round((chart.highest - bar[2]) * chart.ratio),
+                        Math.round((chart.highest - bar[BarColumn.High]) * chart.ratio),
                         1,
-                        Math.round((bar[2] - bar[3]) * chart.ratio)
+                        Math.round((bar[BarColumn.High] - bar[BarColumn.Low]) * chart.ratio)
                     );
                 }
 
@@ -692,11 +709,11 @@ export class Kuromaty {
                 }
 
                 // highest
-                if (period !== 0 && bar[2] === chart.highestPrice) {
+                if (period !== 0 && bar[BarColumn.High] === chart.highestPrice) {
                     this.overlay.context.fillStyle = this.color.long;
 
                     let hpX = barX - this.options.barWidth / 2;
-                    let hpY = Math.round((chart.highest - bar[2]) * chart.ratio);
+                    let hpY = Math.round((chart.highest - bar[BarColumn.High]) * chart.ratio);
 
                     this.overlay.context.beginPath();
                     this.overlay.context.moveTo(hpX, hpY - 2);
@@ -709,7 +726,7 @@ export class Kuromaty {
 
                         this.overlay.context.textAlign = (i < l / 2) ? "right" : "left";
                         this.overlay.context.fillText(
-                            util.fixedDecimal(bar[2], decimalPower),
+                            util.fixedDecimal(bar[BarColumn.High], decimalPower),
                             barX - ((i < l / 2) ? 0 : 5),
                             hpY - 8
                         );
@@ -725,11 +742,11 @@ export class Kuromaty {
                     }
                 }
                 // lowest
-                if (period !== 0 && bar[3] === chart.lowestPrice) {
+                if (period !== 0 && bar[BarColumn.Low] === chart.lowestPrice) {
                     this.overlay.context.fillStyle = this.color.short;
 
                     let lpX = barX - this.options.barWidth / 2;
-                    let lpY = Math.round((chart.highest - bar[3]) * chart.ratio);
+                    let lpY = Math.round((chart.highest - bar[BarColumn.Low]) * chart.ratio);
 
                     this.overlay.context.beginPath();
                     this.overlay.context.moveTo(lpX, lpY + 2);
@@ -742,7 +759,7 @@ export class Kuromaty {
 
                         this.overlay.context.textAlign = (i < l / 2) ? "right" : "left";
                         this.overlay.context.fillText(
-                            util.fixedDecimal(bar[3], decimalPower),
+                            util.fixedDecimal(bar[BarColumn.Low], decimalPower),
                             barX - ((i < l / 2) ? 0 : 5),
                             lpY + 15
                         );
@@ -759,7 +776,7 @@ export class Kuromaty {
                 }
 
                 // bar date
-                barDate = new Date(bar[0]);
+                barDate = new Date(bar[BarColumn.Time]);
                 barDateMinutes = barDate.getMinutes();
                 barDateHours = barDate.getHours();
                 barDateDate = barDate.getDate();
@@ -841,19 +858,19 @@ export class Kuromaty {
                 }
 
                 // Last Depth Indicator (v2.25)
-                if (chart._bars[0][6] && chart._bars[0][7]) {
+                if (chart._bars[0][BarColumn.AskDepth] && chart._bars[0][BarColumn.BidDepth]) {
                     this._drawDepthIndicator(
                         this.overlay.context,
                         chartW - chartM - 7,
                         15,
-                        chart._bars[0][6],
+                        chart._bars[0][BarColumn.AskDepth],
                         this.color.askDepthLast
                     );
                     this._drawDepthIndicator(
                         this.overlay.context,
                         chartW - chartM - 7,
                         chartH - 15,
-                        chart._bars[0][7],
+                        chart._bars[0][BarColumn.BidDepth],
                         this.color.bidDepthLast
                     );
                 }
@@ -1041,7 +1058,7 @@ export class Kuromaty {
         } // technical
 
         // datetime
-        barDate = new Date(this.charts[0]._bars[0][0]);
+        barDate = new Date(this.charts[0]._bars[0][BarColumn.Time]);
         this.grid.context.textAlign = "right";
         this.grid.context.fillStyle = this.color.text;
         this.grid.context.fillText(
@@ -1139,7 +1156,7 @@ export class Kuromaty {
                     20
                 );
                 // Time Text
-                barDate = new Date(chart._bars[i][0]);
+                barDate = new Date(chart._bars[i][BarColumn.Time]);
                 this.grid.context.textAlign = "center";
                 this.grid.context.fillStyle = this.color.textStrong;
                 this.grid.context.font = "10px sans-serif";
@@ -1153,14 +1170,14 @@ export class Kuromaty {
                 this.overlay.context.textAlign = "left";
                 this.overlay.context.fillStyle = this.color.textStrong;
                 this.overlay.context.font = "12px monospace";
-                const diff = Math.round((100 - (chart._bars[i][1] / chart._bars[i][4] * 100)) * 1000) / 1000;
+                const diff = Math.round((100 - (chart._bars[i][BarColumn.Open] / chart._bars[i][BarColumn.Close] * 100)) * 1000) / 1000;
                 this.overlay.context.fillText(
                     (
                         barDate.toLocaleString() +
-                        `  O ${util.fixedDecimal(chart._bars[i][1], decimalPower)}` +
-                        `  H ${util.fixedDecimal(chart._bars[i][2], decimalPower)}` +
-                        `  L ${util.fixedDecimal(chart._bars[i][3], decimalPower)}` +
-                        `  C ${util.fixedDecimal(chart._bars[i][4], decimalPower)}` +
+                        `  O ${util.fixedDecimal(chart._bars[i][BarColumn.Open], decimalPower)}` +
+                        `  H ${util.fixedDecimal(chart._bars[i][BarColumn.High], decimalPower)}` +
+                        `  L ${util.fixedDecimal(chart._bars[i][BarColumn.Low], decimalPower)}` +
+                        `  C ${util.fixedDecimal(chart._bars[i][BarColumn.Close], decimalPower)}` +
                         `  ${util.toStringWithSign(diff)}%`
                     ),
                     10,
@@ -1188,7 +1205,7 @@ export class Kuromaty {
                     this.overlay.context.font = "10px sans-serif";
                     this.overlay.context.fillStyle = this.color.volume;
                     this.overlay.context.fillText(
-                        (Math.abs(Math.round(chart._bars[i + 1][5] - chart._bars[i][5]))).toString(10),
+                        (Math.abs(Math.round(chart._bars[i + 1][BarColumn.Volume] - chart._bars[i][BarColumn.Volume]))).toString(10),
                         pX + barW + 2,
                         (chart.highest - chart.lowestPrice) * chart.ratio + 12,
                         46
@@ -1282,14 +1299,14 @@ export class Kuromaty {
         } else if (period === 0) {
             return chart.ticks.slice(start, start + barCount).map(tick => {
                 return <Bar>[
-                    tick[0],
-                    tick[1],
-                    tick[1],
-                    tick[1],
-                    tick[1],
-                    tick[2],
-                    tick[3],
-                    tick[4],
+                    tick[TickColumn.Time],
+                    tick[TickColumn.Ltp],
+                    tick[TickColumn.Ltp],
+                    tick[TickColumn.Ltp],
+                    tick[TickColumn.Ltp],
+                    tick[TickColumn.Volume],
+                    tick[TickColumn.AskDepth],
+                    tick[TickColumn.BidDepth],
                 ];
             });
         }
@@ -1305,7 +1322,7 @@ export class Kuromaty {
             const hBars = chart.hBars;
 
             if (start !== 0) {
-                date = new Date(hBars[0][0]);
+                date = new Date(hBars[0][BarColumn.Time]);
                 backCount = start * (period / 60) + (date.getHours() % (period / 60)) - (period / 60);
             }
 
@@ -1314,45 +1331,45 @@ export class Kuromaty {
                 hBars.length - 1
             );
             for (; i >= backCount; i--) {
-                date = new Date(hBars[i][0]);
+                date = new Date(hBars[i][BarColumn.Time]);
     
                 if (
                     bars.length === 0 ||
                     (
                         date.getHours() % Math.ceil(period / 60) === 0 &&
-                        bars[0][0] < hBars[i][0]
+                        bars[0][BarColumn.Time] < hBars[i][BarColumn.Time]
                     )
                 ) {
                     bars.unshift([
                         date.getTime(),
-                        hBars[i][1],
-                        hBars[i][2],
-                        hBars[i][3],
-                        hBars[i][4],
-                        hBars[i][5],
-                        hBars[i][6] || 0,
-                        hBars[i][7] || 0
+                        hBars[i][BarColumn.Open],
+                        hBars[i][BarColumn.High],
+                        hBars[i][BarColumn.Low],
+                        hBars[i][BarColumn.Close],
+                        hBars[i][BarColumn.Volume],
+                        hBars[i][BarColumn.AskDepth] || 0,
+                        hBars[i][BarColumn.BidDepth] || 0
                     ]);
                     continue;
                 }
     
-                if (bars[0][2] < hBars[i][2]) {
-                    bars[0][2] = hBars[i][2];
+                if (bars[0][BarColumn.High] < hBars[i][BarColumn.High]) {
+                    bars[0][BarColumn.High] = hBars[i][BarColumn.High];
                 }
-                if (bars[0][3] > hBars[i][3]) {
-                    bars[0][3] = hBars[i][3];
+                if (bars[0][BarColumn.Low] > hBars[i][BarColumn.Low]) {
+                    bars[0][BarColumn.Low] = hBars[i][BarColumn.Low];
                 }
-                bars[0][4] = hBars[i][4];
-                bars[0][5] = hBars[i][5];
-                bars[0][6] = hBars[i][6] || 0;
-                bars[0][7] = hBars[i][7] || 0;
+                bars[0][BarColumn.Close] = hBars[i][BarColumn.Close];
+                bars[0][BarColumn.Volume] = hBars[i][BarColumn.Volume];
+                bars[0][BarColumn.AskDepth] = hBars[i][BarColumn.AskDepth] || 0;
+                bars[0][BarColumn.BidDepth] = hBars[i][BarColumn.BidDepth] || 0;
             }
         }
 
         const mBars = chart.bars;
 
         if (start !== 0) {
-            date = new Date(mBars[0][0]);
+            date = new Date(mBars[0][BarColumn.Time]);
             backCount = start * period + (date.getMinutes() % period) - period;
         }
 
@@ -1361,43 +1378,43 @@ export class Kuromaty {
             mBars.length - 1
         ) - (bars.length * (period / 60));
         for (; i >= backCount; i--) {
-            if (bars.length !== 0 && bars[0][0] > mBars[i][0]) {
+            if (bars.length !== 0 && bars[0][BarColumn.Time] > mBars[i][BarColumn.Time]) {
                 continue;
             }
 
-            date = new Date(mBars[i][0]);
+            date = new Date(mBars[i][BarColumn.Time]);
 
             if (
                 bars.length === 0 ||
                 (
                     date.getMinutes() % period === 0 &&
                     date.getHours() % Math.ceil(period / 60) === 0 &&
-                    bars[0][0] < mBars[i][0]
+                    bars[0][BarColumn.Time] < mBars[i][BarColumn.Time]
                 )
             ) {
                 bars.unshift([
                     date.setSeconds(0, 0),
-                    mBars[i][1],
-                    mBars[i][2],
-                    mBars[i][3],
-                    mBars[i][4],
-                    mBars[i][5],
-                    mBars[i][6] || 0,
-                    mBars[i][7] || 0
+                    mBars[i][BarColumn.Open],
+                    mBars[i][BarColumn.High],
+                    mBars[i][BarColumn.Low],
+                    mBars[i][BarColumn.Close],
+                    mBars[i][BarColumn.Volume],
+                    mBars[i][BarColumn.AskDepth] || 0,
+                    mBars[i][BarColumn.BidDepth] || 0
                 ]);
                 continue;
             }
 
-            if (bars[0][2] < mBars[i][2]) {
-                bars[0][2] = mBars[i][2];
+            if (bars[0][BarColumn.High] < mBars[i][BarColumn.High]) {
+                bars[0][BarColumn.High] = mBars[i][BarColumn.High];
             }
-            if (bars[0][3] > mBars[i][3]) {
-                bars[0][3] = mBars[i][3];
+            if (bars[0][BarColumn.Low] > mBars[i][BarColumn.Low]) {
+                bars[0][BarColumn.Low] = mBars[i][BarColumn.Low];
             }
-            bars[0][4] = mBars[i][4];
-            bars[0][5] = mBars[i][5];
-            bars[0][6] = mBars[i][6] || 0;
-            bars[0][7] = mBars[i][7] || 0;
+            bars[0][BarColumn.Close] = mBars[i][BarColumn.Close];
+            bars[0][BarColumn.Volume] = mBars[i][BarColumn.Volume];
+            bars[0][BarColumn.AskDepth] = mBars[i][BarColumn.AskDepth] || 0;
+            bars[0][BarColumn.BidDepth] = mBars[i][BarColumn.BidDepth] || 0;
         }
 
         return bars.slice(0, barCount);
@@ -1871,7 +1888,7 @@ export class Kuromaty {
 
             p = 0;
             for (j = 0; j < value; j++) {
-                p += chart._bars[i + j][4];
+                p += chart._bars[i + j][BarColumn.Close];
             }
             p /= value;
             y = Math.round((chart.highest - p) * chart.ratio) + 0.5;
