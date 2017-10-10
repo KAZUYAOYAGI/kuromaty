@@ -16,6 +16,14 @@ export function fixedDecimal(number: number, length: number): string {
     }
 }
 
+export function generatePriceGrouping(decimal, groupSize: number): (price: number) => number {
+    if (decimal === 1) {
+        return (price) => Math.round(price / groupSize) * groupSize;
+    }
+
+    return (price) => Math.round(price * (decimal / groupSize)) / (decimal / groupSize);
+}
+
 export function toStringWithSign(number: number): string {
     return (number > 0 ? "+" : "") + number.toString(10);
 }

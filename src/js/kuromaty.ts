@@ -8,7 +8,8 @@ import { Order as _Order, OrderLike } from "./Order";
 import { OrderSet } from "./OrderSet";
 import flagrate from "flagrate/lib/es6/flagrate";
 import { ContextMenu } from "flagrate/lib/es6/flagrate/context-menu";
-
+import {generatePriceGrouping} from "./util";
+import { Decimal } from "decimal.js-light";
 export { Side as PositionSide } from "./Position";
 
 /** time, open, high, low, close, volume, askDepth, bidDepth */
@@ -343,29 +344,54 @@ export class Kuromaty {
     updateBoard(index: number, board: Board) {
 
         const chart = this.charts[index];
+        const groupPrice = generatePriceGrouping(this._decimal, this.options.boardGroupSize);
 
-        chart.boardMaxSize = 0;
+        let boardMaxSize = 0;
 
-        for (let i = 0; i < board.asks.length; i++) {
-            if (board.asks[i].price > chart.highest) {
-                board.asks.splice(i, board.asks.length - i);
-                break;
+        const maxPrice = chart.highest;
+        const minPrice = chart.lowest;
+        function groupUp(boardItems: BoardItem[]) {
+            if (boardItems.length === 0) {
+                return [];
             }
-            if (chart.boardMaxSize < board.asks[i].size) {
-                chart.boardMaxSize = board.asks[i].size;
+
+            let current: BoardItem = {price: groupPrice(boardItems[0].price), size: 0};
+            let currentSize = new Decimal(0);
+            const groupedItems = [current];
+            for (let i = 0; i < boardItems.length; i++) {
+                const price = groupPrice(boardItems[i].price);
+                if (price < minPrice || maxPrice < price) {
+                    break;
+                }
+
+                if (current.price !== price) {
+                    if (boardMaxSize < current.size) {
+                        boardMaxSize = current.size;
+                    }
+                    current = {
+                        price,
+                        size: boardItems[i].size
+                    };
+                    currentSize = new Decimal(current.size);
+                    groupedItems.push(current);
+                } else {
+                    currentSize = currentSize.plus(boardItems[i].size);
+                    current.size = currentSize.toNumber();
+                }
             }
+
+            if (boardMaxSize < current.size) {
+                boardMaxSize = current.size;
+            }
+
+            return groupedItems;
         }
-        for (let i = 0; i < board.bids.length; i++) {
-            if (board.bids[i].price < chart.lowest) {
-                board.bids.splice(i, board.bids.length - i);
-                break;
-            }
-            if (chart.boardMaxSize < board.bids[i].size) {
-                chart.boardMaxSize = board.bids[i].size;
-            }
-        }
+
+        board.asks = groupUp(board.asks);
+        board.bids = groupUp(board.bids);
 
         chart.board = board;
+        chart.boardMaxSize = boardMaxSize;
 
         this._hasUpdated = true;
     }
