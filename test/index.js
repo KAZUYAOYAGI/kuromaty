@@ -143,7 +143,9 @@
         // 複数チャート
         chartCount: Math.min(2, symbols.length),
         chartTitles: symbols,
-        chartOverlay: true
+        chartOverlay: true,
+        boardGroupSize: 50,
+        pricePopEffect: true
     });
 
     kuromaty.timePeriod = parseInt(load("timePeriod") || "1", 10);

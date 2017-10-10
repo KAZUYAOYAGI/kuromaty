@@ -7,6 +7,7 @@ import { PositionSet } from "./PositionSet";
 import { Order as _Order, OrderLike } from "./Order";
 import { OrderSet } from "./OrderSet";
 import flagrate from "flagrate/lib/es6/flagrate";
+import { ContextMenu } from "flagrate/lib/es6/flagrate/context-menu";
 
 export { Side as PositionSide } from "./Position";
 
@@ -40,6 +41,8 @@ export interface Options {
     barWidth?: number;
     barMargin?: number;
     decimalPower?: number;
+    boardGroupSize?: number;
+    pricePopEffect?: boolean;
     quickOrder?: boolean;
     quickOrderHandler?: (order: QuickOrder) => void;
 }
@@ -180,6 +183,7 @@ export class Kuromaty {
     private _decimal: number;
     private _positions: PositionSet = new PositionSet();
     private _orders: OrderSet = new OrderSet();
+    private _contextMenu: ContextMenu;
 
     private __keydownHandler = this._keydownHandler.bind(this);
 
@@ -863,14 +867,14 @@ export class Kuromaty {
                         this.overlay.context,
                         chartW - chartM - 7,
                         15,
-                        chart._bars[0][BarColumn.AskDepth],
+                        `Ask=${Math.round(chart._bars[0][BarColumn.AskDepth])}`,
                         this.color.askDepthLast
                     );
                     this._drawDepthIndicator(
                         this.overlay.context,
                         chartW - chartM - 7,
                         chartH - 15,
-                        chart._bars[0][BarColumn.BidDepth],
+                        `Bid=${Math.round(chart._bars[0][BarColumn.BidDepth])}`,
                         this.color.bidDepthLast
                     );
                 }
@@ -992,48 +996,9 @@ export class Kuromaty {
                 );
 
                 // Price Pop Effect (testing)
-                for (i = 0; i < this._pricePops.length; i++) {
-                    this._pricePops[i][0] *= 0.95;
-                    if (this._pricePops[i][0] < 0.08) {
-                        this._pricePops.splice(i, 1);
-                        i--;
-                        continue;
-                    }
-                    if (this._pricePops[i][5]) {
-                        this._pricePops[i][4] -= 0.15;
-                    } else {
-                        this._pricePops[i][4] += 0.15;
-                    }
+                if (this.options.pricePopEffect) {
+                    this._drawPricePopEffect(chart, decimal, chartW, ltpp);
                 }
-                if (chart.tickDelta !== 0) {
-                    this._pricePops.push([
-                        1,
-                        (Math.round(Math.abs(chart.tickDelta) * decimal) / decimal).toString(10),
-                        chart.tickDelta > 0 ? this.color.long : this.color.short,
-                        chartW - 12,
-                        chart.tickDelta > 0 ? (ltpp - 8) : (ltpp + 16),
-                        chart.tickDelta > 0,
-                        Math.abs(chart.tickDelta) / chart.latest * 100 > 0.025 ? "bold 11px sans-serif" : "10px sans-serif"
-                    ]);
-
-                    this._afs = Math.max(50, this._afs);
-                    chart.tickDelta = 0;
-                }
-                this.overlay.context.save();
-                this.overlay.context.textAlign = "right";
-                for (i = 0; i < this._pricePops.length; i++) {
-                    const [alpha, delta, fillStyle, posX, posY, isBuy, font] = this._pricePops[i];
-
-                    this.overlay.context.font = font;
-                    this.overlay.context.globalAlpha = alpha;
-                    this.overlay.context.fillStyle = fillStyle;
-                    this.overlay.context.fillText(
-                        delta,
-                        posX,
-                        posY
-                    );
-                }
-                this.overlay.context.restore();
             }
         } // main
 
@@ -1285,6 +1250,53 @@ export class Kuromaty {
         }
     }
 
+    private _drawPricePopEffect(chart: Chart, decimal: number, chartW: number, ltpp: number): void {
+
+        let i;
+        for (i = 0; i < this._pricePops.length; i++) {
+            this._pricePops[i][0] *= 0.95;
+            if (this._pricePops[i][0] < 0.08) {
+                this._pricePops.splice(i, 1);
+                i--;
+                continue;
+            }
+            if (this._pricePops[i][5]) {
+                this._pricePops[i][4] -= 0.15;
+            } else {
+                this._pricePops[i][4] += 0.15;
+            }
+        }
+        if (chart.tickDelta !== 0) {
+            this._pricePops.push([
+                1,
+                (Math.round(Math.abs(chart.tickDelta) * decimal) / decimal).toString(10),
+                chart.tickDelta > 0 ? this.color.long : this.color.short,
+                chartW - 12,
+                chart.tickDelta > 0 ? (ltpp - 8) : (ltpp + 16),
+                chart.tickDelta > 0,
+                Math.abs(chart.tickDelta) / chart.latest * 100 > 0.025 ? "bold 11px sans-serif" : "10px sans-serif"
+            ]);
+
+            this._afs = Math.max(50, this._afs);
+            chart.tickDelta = 0;
+        }
+        this.overlay.context.save();
+        this.overlay.context.textAlign = "right";
+        for (i = 0; i < this._pricePops.length; i++) {
+            const [alpha, delta, fillStyle, posX, posY, isBuy, font] = this._pricePops[i];
+
+            this.overlay.context.font = font;
+            this.overlay.context.globalAlpha = alpha;
+            this.overlay.context.fillStyle = fillStyle;
+            this.overlay.context.fillText(
+                delta,
+                posX,
+                posY
+            );
+        }
+        this.overlay.context.restore();
+    }
+
     private _getBars(index: number, start: number, count: number, hiddenCount: number): Bar[] {
 
         const chart = this.charts[index];
@@ -1450,13 +1462,17 @@ export class Kuromaty {
         ev.preventDefault();
 
         const price = this.cursorPrice;
+        const limitSide = this.charts[0].latest > price ? "buy" : "sell";
+        const stopSide = limitSide === "buy" ? "sell" : "buy";
+        const limitSideLabel = limitSide === "buy" ? "買い" : "売り";
+        const stopSideLabel = stopSide === "buy" ? "買い" : "売り";
 
         const quickOrderItems = [];
 
         if (this.options.quickOrder) {
             quickOrderItems.push(
                 {
-                    label: "[beta] 指値注文...",
+                    labelHTML: `<span class="kuromaty-label ${limitSide}">${limitSideLabel}</span> 指値注文...`,
                     onSelect: () => {
                         this.options.quickOrderHandler({
                             price: price,
@@ -1465,7 +1481,7 @@ export class Kuromaty {
                     }
                 },
                 {
-                    label: "[beta] STOP-LIMIT 注文...",
+                    labelHTML: `<span class="kuromaty-label ${stopSide}">${stopSideLabel}</span> STOP-LIMIT 注文...`,
                     onSelect: () => {
                         this.options.quickOrderHandler({
                             price: price,
@@ -1476,7 +1492,11 @@ export class Kuromaty {
             );
         }
 
-        new flagrate.ContextMenu({
+        if (this._contextMenu && this._contextMenu.visible() === true) {
+            this._contextMenu.close();
+        }
+
+        this._contextMenu = new flagrate.ContextMenu({
             target: this._rootContainer,
             items: [
                 {
@@ -1512,6 +1532,13 @@ export class Kuromaty {
         if (ev.target !== this.overlay.canvas) {
             return;
         }
+        ev.preventDefault();
+
+        if (this._contextMenu && this._contextMenu.visible() === true) {
+            this._contextMenu.close();
+            this._contextMenu = null;
+            return;
+        }
 
         let offsetX = ev.offsetX;
         let offsetY = ev.offsetY;
@@ -1542,8 +1569,6 @@ export class Kuromaty {
         this._lastPointerdown = [offsetX, offsetY];
         this._lastPointerButtons = buttons;
         this._dragStartX = undefined;
-
-        ev.preventDefault();
     }
 
     private _pointerupHandler(ev: PointerEvent) {
@@ -1744,7 +1769,7 @@ export class Kuromaty {
     }
 
     private _drawDepthIndicator(ctx: CanvasRenderingContext2D,
-        x: number, y: number, value: number, color: string) {
+        x: number, y: number, value: string, color: string) {
 
         this._drawBorder(ctx, x, y + 0.5, -10, color, [2, 2]);
 
@@ -1756,12 +1781,12 @@ export class Kuromaty {
         ctx.lineWidth = 2;
         ctx.font = "10px sans-serif";
         ctx.strokeText(
-            Math.round(value).toString(10),
+            value,
             x - 12,
             y + 3.5
         );
         ctx.fillText(
-            Math.round(value).toString(10),
+            value,
             x - 12,
             y + 3.5
         );
@@ -1833,7 +1858,7 @@ export class Kuromaty {
             "#ffffff",
             [1, 5],
             null,
-            0.5
+            0.45
         );
 
         ctx.save();
@@ -1851,7 +1876,7 @@ export class Kuromaty {
         ctx.textAlign = "left";
         ctx.fillStyle = color;
         ctx.fillText(
-            `${order.size}/${order.origSize} ${order.side} ${order.type}`,
+            `${order.size} ${order.side} ${order.type}`,
             x + 6,
             y - 5,
             76
