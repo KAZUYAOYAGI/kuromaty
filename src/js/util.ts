@@ -17,6 +17,7 @@ export function fixedDecimal(number: number, length: number): string {
 }
 
 export function generatePriceGrouping(decimal, groupSize: number): (price: number) => number {
+
     if (decimal === 1) {
         return (price) => Math.round(price / groupSize) * groupSize;
     }
@@ -44,4 +45,35 @@ export function copyTextToClipboard(text: string): void {
     document.execCommand("copy");
 
     span.remove();
+}
+
+export function deepCopy<T>(obj: T): T {
+
+    let newObj;
+
+    if (Array.isArray(obj)) {
+      newObj = obj.length > 0 ? obj.slice(0) : [];
+      newObj.forEach((e, i) => {
+        if (
+            (typeof e === "object" && e !== {}) ||
+            (Array.isArray(e) && e.length > 0)
+        ) {
+          newObj[i] = deepCopy(e);
+        }
+      });
+    } else if (typeof obj === "object") {
+      newObj = Object.assign({}, obj);
+      Object.keys(newObj).forEach((key) => {
+        if (
+            (typeof newObj[key] === "object" && newObj[key] !== {}) ||
+            (Array.isArray(newObj[key]) && newObj[key].length > 0)
+        ) {
+          newObj[key] = deepCopy(newObj[key]);
+        }
+      });
+    } else {
+      newObj = obj;
+    }
+    
+    return newObj;
 }
