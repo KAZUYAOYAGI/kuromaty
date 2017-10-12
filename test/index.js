@@ -144,7 +144,7 @@
         chartCount: Math.min(2, symbols.length),
         chartTitles: symbols,
         chartOverlay: true,
-        boardGroupSize: 50,
+        boardGroupSize: 100,
         pricePopEffect: true
     });
 

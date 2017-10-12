@@ -129,6 +129,7 @@ export class Kuromaty {
     cursorPrice = 0;
     cursorVolume = 0;
     cursorBoard = 0;
+    cursorBoardPrice = 0;
     pinnedPrices: number[] = [];
     maxBarCount = 8200;
     hasDepleted = false;
@@ -1100,29 +1101,48 @@ export class Kuromaty {
 
             // board
             this.cursorBoard = 0;
+            this.cursorBoardPrice = 0;
             if (chart.board) {
-                for (j = 0; j < chart.board.asks.length - 1; j++) {
-                    if (chart.board.asks[j].price === this.cursorPrice) {
-                        this.cursorBoard = chart.board.asks[j].size;
-                        break;
+                if (this.cursorPrice > chart.latest) {
+                    for (j = chart.board.asks.length - 1; j >= 0; j--) {
+                        if (chart.board.asks[j].price <= this.cursorPrice) {
+                            this.cursorBoard = chart.board.asks[j].size;
+                            this.cursorBoardPrice = chart.board.asks[j].price;
+                            break;
+                        }
                     }
                 }
-                for (j = 0; j < chart.board.bids.length - 1; j++) {
-                    if (chart.board.bids[j].price === this.cursorPrice) {
-                        this.cursorBoard = chart.board.bids[j].size;
-                        break;
+                if (this.cursorPrice < chart.latest) {
+                    for (j = chart.board.bids.length - 1; j >= 0; j--) {
+                        if (chart.board.bids[j].price >= this.cursorPrice) {
+                            this.cursorBoard = chart.board.bids[j].size;
+                            this.cursorBoardPrice = chart.board.bids[j].price;
+                            break;
+                        }
                     }
                 }
             }
-            if (this.cursorBoard) {
+            this.cursorBoard = Math.round(this.cursorBoard);
+            if (this.cursorBoard > 0) {
+                const cursorBoardPriceY = Math.round((chart.highest - this.cursorBoardPrice) * chart.ratio);
+                
+                this._drawBorder(
+                    this.overlay.context,
+                    chartW - 25,
+                    cursorBoardPriceY + (this.cursorPrice > chart.latest ? -0.5 : +0.5),
+                    10,
+                    this.cursorPrice > chart.latest ? this.color.askOrder : this.color.bidOrder,
+                    [1, 1]
+                );
+
                 this.overlay.context.save();
 
                 this.overlay.context.globalAlpha = 0.8;
                 this.overlay.context.fillStyle = this.color.bg;
                 this.overlay.context.fillRect(
-                    chartW - 25,
-                    cursorPriceY - 5,
-                    -32,
+                    chartW - 29,
+                    cursorBoardPriceY - 7,
+                    -22,
                     13
                 );
 
@@ -1130,10 +1150,10 @@ export class Kuromaty {
                 this.overlay.context.textAlign = "right";
                 this.overlay.context.fillStyle = this.cursorPrice > chart.latest ? this.color.askOrder : this.color.bidOrder;
                 this.overlay.context.fillText(
-                    util.fixedDecimal(this.cursorBoard, 3),
-                    chartW - 25,
-                    cursorPriceY + 5,
-                    30
+                    this.cursorBoard.toString(10),
+                    chartW - 29,
+                    cursorBoardPriceY + 3,
+                    20
                 );
                 
                 this.overlay.context.restore();
