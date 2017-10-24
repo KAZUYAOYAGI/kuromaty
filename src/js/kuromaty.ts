@@ -1220,7 +1220,7 @@ export class Kuromaty {
                     this.overlay.context.font = "10px sans-serif";
                     this.overlay.context.fillStyle = this.color.volume;
                     this.overlay.context.fillText(
-                        bar[BarColumn.Volume].toString(10),
+                        Math.round(chart._bars[i][BarColumn.Volume]).toString(10),
                         pX + (barW / 2),
                         (chart.highest - chart.lowestPrice) * chart.ratio + 12,
                         30
@@ -1422,7 +1422,7 @@ export class Kuromaty {
                     bars[0][BarColumn.Low] = hBars[i][BarColumn.Low];
                 }
                 bars[0][BarColumn.Close] = hBars[i][BarColumn.Close];
-                bars[0][BarColumn.Volume] = hBars[i][BarColumn.Volume];
+                bars[0][BarColumn.Volume] += hBars[i][BarColumn.Volume];
                 bars[0][BarColumn.AskDepth] = hBars[i][BarColumn.AskDepth] || 0;
                 bars[0][BarColumn.BidDepth] = hBars[i][BarColumn.BidDepth] || 0;
             }
@@ -1474,7 +1474,7 @@ export class Kuromaty {
                 bars[0][BarColumn.Low] = mBars[i][BarColumn.Low];
             }
             bars[0][BarColumn.Close] = mBars[i][BarColumn.Close];
-            bars[0][BarColumn.Volume] = mBars[i][BarColumn.Volume];
+            bars[0][BarColumn.Volume] += mBars[i][BarColumn.Volume];
             bars[0][BarColumn.AskDepth] = mBars[i][BarColumn.AskDepth] || 0;
             bars[0][BarColumn.BidDepth] = mBars[i][BarColumn.BidDepth] || 0;
         }
