@@ -615,8 +615,8 @@ export class Kuromaty {
                 if (lowest > bar[BarColumn.Low]) {
                     lowest = bar[BarColumn.Low];
                 }
-                if (maxVolume < Math.abs(chart._bars[i + 1][BarColumn.Volume] - bar[BarColumn.Volume])) {
-                    maxVolume = Math.abs(chart._bars[i + 1][BarColumn.Volume] - bar[BarColumn.Volume]);
+                if (maxVolume < bar[BarColumn.Volume]) {
+                    maxVolume = bar[BarColumn.Volume];
                 }
                 if (maxDepth < bar[BarColumn.AskDepth]) {
                     maxDepth = bar[BarColumn.AskDepth];
@@ -712,7 +712,7 @@ export class Kuromaty {
                     barX - Math.ceil(this.options.barWidth / 2),
                     chartH,
                     1,
-                    - Math.abs(Math.round((chart._bars[i + 1][BarColumn.Volume] - bar[BarColumn.Volume]) * chart.volumeRatio))
+                    - Math.round(bar[BarColumn.Volume] * chart.volumeRatio)
                 );
 
                 if (period !== 0) {
@@ -1220,7 +1220,7 @@ export class Kuromaty {
                     this.overlay.context.font = "10px sans-serif";
                     this.overlay.context.fillStyle = this.color.volume;
                     this.overlay.context.fillText(
-                        (Math.abs(Math.round(chart._bars[i + 1][BarColumn.Volume] - chart._bars[i][BarColumn.Volume]))).toString(10),
+                        bar[BarColumn.Volume].toString(10),
                         pX + (barW / 2),
                         (chart.highest - chart.lowestPrice) * chart.ratio + 12,
                         30
