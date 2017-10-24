@@ -238,7 +238,7 @@
 
         if (
             kuromaty.timePeriod < 60 && period === "h" ||
-            kuromaty.timePeriod >= 60 && period === "m"
+            kuromaty.timePeriod >= 60 && period === "m" && kuromaty.charts[index].bars.length !== 0
         ) {
             setTimeout(getExtras, 250, index, symbol, period);
             return;
@@ -275,31 +275,9 @@
         setTimeout(getExtras, 1000, symbols.indexOf(symbol), symbol, "h");
     });
 
-    // チャート初期化
-    kuro.socket.on("chart-bars", function (symbol, bars) {
-
-        if (bars.length === 0) {
-            kuro.element.timestamp.text("N/A");
-            return;
-        }
-
-        var index = symbols.indexOf(symbol);
-
-        // データはチャートごと
-        kuromaty.update(index, bars);
-
-        var timestamp = new Date(bars[0][0]);
-        kuro.element.timestamp.text(
-            timestamp.getHours() + ":" +
-            ("0" + timestamp.getMinutes()).slice(-2) + ":" +
-            ("0" + timestamp.getSeconds()).slice(-2)
-        );
-    });
-
     // データ要求
     kuro.socket.on("ready", function () {
         symbols.forEach(function (symbol) {
-            kuro.socket.emit("chart-bars-req", symbol, 1440);
             if (/^CC_/.test(symbol) === true) {
                 kuro.socket.emit("join", "cc_ticker_" + symbol);
             } else {

@@ -275,7 +275,7 @@ export class Kuromaty {
         const chart = this.charts[index];
 
         chart.tickDelta = 0;
-        if (chart.ticks[0] && chart.bars[0][BarColumn.Close] !== tick[TickColumn.Ltp]) {
+        if (chart.ticks[0] && chart.bars[0] && chart.bars[0][BarColumn.Close] !== tick[TickColumn.Ltp]) {
             chart.tickDelta = tick[TickColumn.Ltp] - chart.bars[0][BarColumn.Close];
         }
         if (!chart.ticks[0] || 1000 < tick[TickColumn.Time] - chart.ticks[0][TickColumn.Time]) {
@@ -599,7 +599,7 @@ export class Kuromaty {
             }
 
             if (chart.selected) {
-                if (barCount > l && this.maxBarCount > chart.bars.length && chart._bars.length > 0) {
+                if (barCount > l && this.maxBarCount > chart.bars.length && chart._bars.length > 0 || chart.bars.length === 0) {
                     this.hasDepleted = true;
                 }
             }
