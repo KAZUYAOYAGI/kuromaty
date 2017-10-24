@@ -332,7 +332,9 @@ export class Kuromaty {
                 bar[BarColumn.Low] = tick[TickColumn.Ltp];
             }
             bar[BarColumn.Close] = tick[TickColumn.Ltp];
-            bar[BarColumn.Volume] = tick[TickColumn.Volume];
+            if (bar[BarColumn.Volume] < tick[TickColumn.Volume]) {
+                bar[BarColumn.Volume] = tick[TickColumn.Volume];
+            }
             bar[BarColumn.AskDepth] = tick[TickColumn.AskDepth];
             bar[BarColumn.BidDepth] = tick[TickColumn.BidDepth];
         }
