@@ -339,15 +339,18 @@ export class Kuromaty {
             bar[BarColumn.BidDepth] = tick[TickColumn.BidDepth];
         }
 
-        const currentHour =  Math.floor(chart.bars[0][BarColumn.Time]/1000/60/60);
-        const latestHBarHour = Math.floor(chart.hBars[0][BarColumn.Time]/1000/60/60);
-        if (currentHour == latestHBarHour) {
-            chart.hBars[0] = this.downSampleMBars(chart, 60, 0, 1)[0];
-        } else {
-            const hBars = this.downSampleMBars(chart, 60, 0, currentHour - latestHBarHour + 1);
-            chart.hBars.shift();
-            Array.prototype.unshift.apply(chart.hBars, hBars);
+        if (chart.hBars[0] && chart.bars[0]) {
+            const currentHour =  Math.floor(chart.bars[0][BarColumn.Time]/1000/60/60);
+            const latestHBarHour = Math.floor(chart.hBars[0][BarColumn.Time]/1000/60/60);
+            if (currentHour == latestHBarHour) {
+                chart.hBars[0] = this.downSampleMBars(chart, 60, 0, 1)[0];
+            } else {
+                const hBars = this.downSampleMBars(chart, 60, 0, currentHour - latestHBarHour + 1);
+                chart.hBars.shift();
+                Array.prototype.unshift.apply(chart.hBars, hBars);
+            }
         }
+
         this._hasUpdated = true;
     }
 
