@@ -1381,8 +1381,8 @@ export class Kuromaty {
 
         // use hBars (experimental)
         if (period === 60) {
-            bars.push.apply(bars, chart.hBars.slice(start, start + barCount));
-        } else if (period >= 60) {
+            bars.push.apply(bars, util.deepCopy(chart.hBars.slice(start, start + barCount)));
+        } else if (period > 60) {
             const hBars = chart.hBars;
 
             if (start !== 0) {
