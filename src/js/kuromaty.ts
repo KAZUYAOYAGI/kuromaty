@@ -339,6 +339,15 @@ export class Kuromaty {
             bar[BarColumn.BidDepth] = tick[TickColumn.BidDepth];
         }
 
+        const currentHour =  Math.floor(chart.bars[0][BarColumn.Time]/1000/60/60);
+        const latestHBarHour = Math.floor(chart.hBars[0][BarColumn.Time]/1000/60/60);
+        if (currentHour == latestHBarHour) {
+            chart.hBars[0] = this.downSampleMBars(chart, 60, 0, 1)[0];
+        } else {
+            const hBars = this.downSampleMBars(chart, 60, 0, currentHour - latestHBarHour + 1);
+            chart.hBars.shift();
+            Array.prototype.unshift.apply(chart.hBars, hBars);
+        }
         this._hasUpdated = true;
     }
 
@@ -1373,80 +1382,83 @@ export class Kuromaty {
                     tick[TickColumn.BidDepth],
                 ];
             });
+        } else if (period === 60) {
+            return chart.hBars.slice(start, start + barCount);
+        } else if (period > 60) {
+            return this.downSampleHBars(chart, period, start, barCount);
+        } else {
+            return this.downSampleMBars(chart, period, start, barCount);
         }
+    }
 
+    private downSampleHBars(chart: Chart, period: number, start: number, length: number) {
         const bars: Bar[] = [];
-        let date;
+        const hBars = chart.hBars;
         let backCount = 0;
 
-        // use hBars (experimental)
-        if (period === 60) {
-            bars.push.apply(bars, util.deepCopy(chart.hBars.slice(start, start + barCount)));
-        } else if (period > 60) {
-            const hBars = chart.hBars;
-
-            if (start !== 0) {
-                date = new Date(hBars[0][BarColumn.Time]);
-                backCount = start * (period / 60) + (date.getHours() % (period / 60)) - (period / 60);
-            }
-
-            let i = Math.min(
-                (barCount * (period / 60)) + backCount - 1,
-                hBars.length - 1
-            );
-            for (; i >= backCount; i--) {
-                date = new Date(hBars[i][BarColumn.Time]);
-    
-                if (
-                    bars.length === 0 ||
-                    (
-                        date.getHours() % Math.ceil(period / 60) === 0 &&
-                        bars[0][BarColumn.Time] < hBars[i][BarColumn.Time]
-                    )
-                ) {
-                    bars.unshift([
-                        date.getTime(),
-                        hBars[i][BarColumn.Open],
-                        hBars[i][BarColumn.High],
-                        hBars[i][BarColumn.Low],
-                        hBars[i][BarColumn.Close],
-                        hBars[i][BarColumn.Volume],
-                        hBars[i][BarColumn.AskDepth] || 0,
-                        hBars[i][BarColumn.BidDepth] || 0
-                    ]);
-                    continue;
-                }
-    
-                if (bars[0][BarColumn.High] < hBars[i][BarColumn.High]) {
-                    bars[0][BarColumn.High] = hBars[i][BarColumn.High];
-                }
-                if (bars[0][BarColumn.Low] > hBars[i][BarColumn.Low]) {
-                    bars[0][BarColumn.Low] = hBars[i][BarColumn.Low];
-                }
-                bars[0][BarColumn.Close] = hBars[i][BarColumn.Close];
-                bars[0][BarColumn.Volume] += hBars[i][BarColumn.Volume];
-                bars[0][BarColumn.AskDepth] = hBars[i][BarColumn.AskDepth] || 0;
-                bars[0][BarColumn.BidDepth] = hBars[i][BarColumn.BidDepth] || 0;
-            }
+        if (start !== 0) {
+            const date = new Date(hBars[0][BarColumn.Time]);
+            backCount = start * (period / 60) + (date.getHours() % (period / 60)) - (period / 60);
         }
 
+        let i = Math.min(
+            (length * (period / 60)) + backCount - 1,
+            hBars.length - 1
+        );
+        for (; i >= backCount; i--) {
+            const date = new Date(hBars[i][BarColumn.Time]);
+
+            if (
+                bars.length === 0 ||
+                (
+                    date.getHours() % Math.ceil(period / 60) === 0 &&
+                    bars[0][BarColumn.Time] < hBars[i][BarColumn.Time]
+                )
+            ) {
+                bars.unshift([
+                    date.getTime(),
+                    hBars[i][BarColumn.Open],
+                    hBars[i][BarColumn.High],
+                    hBars[i][BarColumn.Low],
+                    hBars[i][BarColumn.Close],
+                    hBars[i][BarColumn.Volume],
+                    hBars[i][BarColumn.AskDepth] || 0,
+                    hBars[i][BarColumn.BidDepth] || 0
+                ]);
+                continue;
+            }
+
+            if (bars[0][BarColumn.High] < hBars[i][BarColumn.High]) {
+                bars[0][BarColumn.High] = hBars[i][BarColumn.High];
+            }
+            if (bars[0][BarColumn.Low] > hBars[i][BarColumn.Low]) {
+                bars[0][BarColumn.Low] = hBars[i][BarColumn.Low];
+            }
+            bars[0][BarColumn.Close] = hBars[i][BarColumn.Close];
+            bars[0][BarColumn.Volume] += hBars[i][BarColumn.Volume];
+            bars[0][BarColumn.AskDepth] = hBars[i][BarColumn.AskDepth] || 0;
+            bars[0][BarColumn.BidDepth] = hBars[i][BarColumn.BidDepth] || 0;
+        }
+        return bars.slice(0, length);
+    }
+
+    private downSampleMBars(chart: Chart, period: number, start: number, length: number) {
+        const bars: Bar[] = [];
         const mBars = chart.bars;
+        let backCount = 0;
 
         if (start !== 0) {
-            date = new Date(mBars[0][BarColumn.Time]);
+            const date = new Date(mBars[0][BarColumn.Time]);
             backCount = start * period + (date.getMinutes() % period) - period;
         }
 
         let i = Math.min(
-            (barCount * period) + backCount - 1,
+            (length * period) + backCount - 1,
             mBars.length - 1
-        ) - (bars.length * (period / 60));
-        for (; i >= backCount; i--) {
-            if (bars.length !== 0 && bars[0][BarColumn.Time] > mBars[i][BarColumn.Time]) {
-                continue;
-            }
+        );
 
-            date = new Date(mBars[i][BarColumn.Time]);
+        for (; i >= backCount; i--) {
+            const date = new Date(mBars[i][BarColumn.Time]);
 
             if (
                 bars.length === 0 ||
@@ -1481,7 +1493,7 @@ export class Kuromaty {
             bars[0][BarColumn.BidDepth] = mBars[i][BarColumn.BidDepth] || 0;
         }
 
-        return bars.slice(0, barCount);
+        return bars.slice(0, length);
     }
 
     private _keydownHandler(ev: KeyboardEvent) {
