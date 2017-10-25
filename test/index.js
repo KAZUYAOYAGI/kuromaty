@@ -35,7 +35,9 @@
     var symbols = ($.queryParameter("symbols") || "FX_BTC_JPY,BTC_JPY").split(",");
 
     var kuro = window.kuro = {
-        socket: io("https://kuromat.ch"),
+        socket: io("https://kuromat.ch", {
+            transports: ["websocket"]
+        }),
         pubnub: null,
         kuromaty: null,
         options: {
