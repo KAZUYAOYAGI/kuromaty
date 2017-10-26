@@ -1174,11 +1174,14 @@ export class Kuromaty {
                 );
                 // Time Text
                 barDate = new Date(chart._bars[i][BarColumn.Time]);
+                const barTime = barDate.getHours() === 0 && barDate.getMinutes() === 0 ?
+                    `${barDate.getMonth() + 1}/${barDate.getDate()}'` :
+                    `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`;
                 this.grid.context.textAlign = "center";
                 this.grid.context.fillStyle = this.color.textStrong;
                 this.grid.context.font = "10px sans-serif";
                 this.grid.context.fillText(
-                    `${barDate.getHours()}:${util.zeroPadding(barDate.getMinutes(), 2)}`,
+                    barTime,
                     pX + this.options.barWidth / 2,
                     canvasH - 4
                 );
