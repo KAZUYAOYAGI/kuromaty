@@ -1,6 +1,6 @@
 {
   "name": "kuromaty",
-  "version": "1.15.5",
+  "version": "1.16.0",
   "description": "Financial Bar Chart Library for Kuromachart.",
   "homepage": "https://kuromat.ch/",
   "main": "lib/es6/kuromaty.js",
