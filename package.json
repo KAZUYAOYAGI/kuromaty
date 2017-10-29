@@ -5,7 +5,7 @@
   "homepage": "https://kuromat.ch/",
   "main": "lib/es6/kuromaty.js",
   "scripts": {
-    "start": "ws -f tiny --spa test/index.html -r \"/api/* -> https://kuromat.ch/api/$1\"",
+    "start": "ws -f tiny --spa test/index.html -r \"/api/* -> https://api.kuromat.ch/api/$1\"",
     "build": "gulp build",
     "watch": "gulp watch",
     "prepublishOnly": "gulp build",
