@@ -551,7 +551,7 @@ export class Kuromaty {
             chartH = canvasH - 16,
             chartM = barW * Math.max(1, 4 - this.barIndex),
             chartI = Math.max(0, this.barIndex - 3),
-            barCount = Math.round((chartW - chartM) / barW),
+            barCount = Math.round((chartW - chartM) / barW) - 1,
             decimal = this._decimal,
             decimalPower = this.options.decimalPower,
             period = this.timePeriod;
@@ -592,16 +592,11 @@ export class Kuromaty {
             maxDepth = 0;
             minDepth = Infinity;
 
-            if (period === 0) {
-                chart._bars = this._getBars(j, chartI, barCount, 1);
-                l = chart._bars.length - 1;
-            } else {
-                chart._bars = this._getBars(j, chartI, barCount, 25);
-                l = chart._bars.length - 25;
-            }
+            chart._bars = this._getBars(j, chartI, barCount * 2);
+            l = Math.min(barCount, chart._bars.length);
 
             if (chart.selected) {
-                if (barCount > l && this.maxBarCount > chart.bars.length && chart._bars.length > 0 || chart.bars.length === 0) {
+                if (barCount > chart._bars.length && this.maxBarCount > chart.bars.length) {
                     this.hasDepleted = true;
                 }
             }
@@ -1349,11 +1344,10 @@ export class Kuromaty {
         this.overlay.context.restore();
     }
 
-    private _getBars(index: number, start: number, count: number, hiddenCount: number): Bar[] {
+    private _getBars(index: number, start: number, barCount: number): Bar[] {
 
         const chart = this.charts[index];
         const period = this.timePeriod;
-        const barCount = count + hiddenCount;
 
         if (chart.bars.length === 0) {
             return [];
