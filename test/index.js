@@ -35,6 +35,7 @@
     var symbols = ($.queryParameter("symbols") || "FX_BTC_JPY,BTC_JPY").split(",");
 
     var kuro = window.kuro = {
+        apiRoot: "/api/",
         socket: io("https://kuromat.ch", {
             transports: ["websocket"]
         }),
@@ -181,8 +182,7 @@
         FX_BTC_JPY: "bitFlyer BTC-FX/JPY",
         BTC_JPY: "bitFlyer BTC/JPY",
         ETH_BTC: "bitFlyer ETH/BTC",
-        BCH_BTC: "bitFlyer BCH/BTC",
-        CC_BTC_JPY: "Coincheck BTC/JPY"
+        BCH_BTC: "bitFlyer BCH/BTC"
     };
     var title = titleTable[symbols[0]] || symbols[0];
     kuro.element.title.text(title);
@@ -251,9 +251,15 @@
             var before = Date.now();
             if (bars[bars.length - 1]) {
                 before = bars[bars.length - 1][0];
+                if (period === "m") {
+                    before -= 1000 * 60;
+                } else if (period === "h") {
+                    before -= 1000 * 60 * 60 * 1;
+                }
             }
             $.ajax(
-                "/api/ohlc?symbol=" + symbol +
+                kuro.apiRoot +
+                "ohlc?symbol=" + symbol +
                 "&before=" + before +
                 "&period=" + period
             ).done(function (ohlc) {
@@ -264,8 +270,11 @@
                     kuromaty.updateHBars(index, bars.concat(ohlc));
                 }
 
-                if (before !== ohlc[ohlc.length - 1][0]) {
-                    setTimeout(getExtras, 250, index, symbol, period);
+                if (ohlc.length === 0) {
+                    // not enough data
+                    return;
+                } else if (before !== ohlc[ohlc.length - 1][0]) {
+                    setTimeout(getExtras, 100, index, symbol, period);
                 }
             });
         } else {
@@ -273,18 +282,14 @@
         }
     };
     symbols.forEach(function (symbol) {
-        setTimeout(getExtras, 1000, symbols.indexOf(symbol), symbol, "m");
-        setTimeout(getExtras, 1000, symbols.indexOf(symbol), symbol, "h");
+        setTimeout(getExtras, 500, symbols.indexOf(symbol), symbol, "m");
+        setTimeout(getExtras, 500, symbols.indexOf(symbol), symbol, "h");
     });
 
     // データ要求
     kuro.socket.on("ready", function () {
         symbols.forEach(function (symbol) {
-            if (/^CC_/.test(symbol) === true) {
-                kuro.socket.emit("join", "cc_ticker_" + symbol);
-            } else {
-                kuro.socket.emit("join", "lightning_ticker_" + symbol);
-            }
+            kuro.socket.emit("join", "lightning_ticker_" + symbol);
         });
     });
 
@@ -346,7 +351,7 @@
     }
 
     // 板情報 (テスト中)
-    if (kuro.options["板表示"] && /^CC_/.test(symbols[0]) === false) {
+    if (kuro.options["板表示"]) {
         kuro.stat.boardUpdated = false;
         kuro.pubnubBoard = new PUBNUB.ws("wss://pubsub.pubnub.com//sub-c-52a9ab50-291b-11e5-baaa-0619f8945a4f/lightning_board_" + symbols[0]);
         kuro.pubnubBoard.onmessage = function (evt) {
