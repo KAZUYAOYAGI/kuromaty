@@ -1025,6 +1025,9 @@ export class Kuromaty {
 
                 // LTP
                 let ltpp = Math.round((chart.highest - chart.latest) * chart.ratio);
+                if (!ltpp) {
+                    ltpp = Math.round(canvasH / 2);
+                }
 
                 let color = this.color.borderLTP;
                 if (chart.highestPrice === chart.latest) {
