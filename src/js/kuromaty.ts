@@ -549,7 +549,7 @@ export class Kuromaty {
             barW = this.options.barWidth + this.options.barMargin,
             chartW = canvasW - 45,
             chartH = canvasH - 16,
-            chartM = barW * Math.max(1, 4 - this.barIndex),
+            chartM = barW * Math.max(2, 5 - this.barIndex),
             chartI = Math.max(0, this.barIndex - 3),
             barCount = Math.round((chartW - chartM) / barW) - 1,
             decimal = this._decimal,
@@ -885,6 +885,27 @@ export class Kuromaty {
 
                     lp = cp;
                 }
+
+                // Price Range Indicator
+                this._drawVerticalRange(
+                    this.grid.context,
+                    chartW - chartM + barW,
+                    (chart.highest - chart.highestPrice) * chart.ratio,
+                    (chart.highestPrice - chart.lowestPrice) * chart.ratio,
+                    this.color.border,
+                    [2, 1]
+                );
+                this.grid.context.save();
+                this.grid.context.textAlign = "right";
+                this.grid.context.fillStyle = this.color.textWeak;
+                this.grid.context.font = "10px sans-serif";
+                this.grid.context.globalAlpha = 0.6;
+                this.grid.context.fillText(
+                    (chart.highestPrice - chart.lowestPrice).toString(10),
+                    chartW - chartM + barW - 4,
+                    ((chart.highestPrice - chart._bars[0][BarColumn.High]) > (chart._bars[0][BarColumn.Low] - chart.lowestPrice)) ? ((chart.highest - chart.highestPrice) * chart.ratio + 40) : ((chart.highest - chart.lowestPrice) * chart.ratio - 40)
+                );
+                this.grid.context.restore();
 
                 // Last Depth Indicator (v2.25)
                 if (chart._bars[0][BarColumn.AskDepth] && chart._bars[0][BarColumn.BidDepth]) {
@@ -1745,6 +1766,36 @@ export class Kuromaty {
         ctx.moveTo(x, y);
         ctx.lineTo(x + w, y);
         ctx.stroke();
+
+        ctx.restore();
+    }
+
+    private _drawVerticalRange(ctx: CanvasRenderingContext2D,
+        x: number, y: number, h: number,
+        color: string, lineDash: number[]) {
+        
+        x += 0.5;
+
+        ctx.save();
+
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.setLineDash(lineDash);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + h);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + 3, y + 4);
+        ctx.lineTo(x - 3, y + 4);
+        ctx.moveTo(x, y + h);
+        ctx.lineTo(x + 3, y + h - 4);
+        ctx.lineTo(x - 3, y + h - 4);
+        ctx.fill();
 
         ctx.restore();
     }
