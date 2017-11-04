@@ -895,15 +895,23 @@ export class Kuromaty {
                     this.color.border,
                     [2, 1]
                 );
+                let priceRangeLabelY = ((chart.highestPrice - chart._bars[0][BarColumn.High]) > (chart._bars[0][BarColumn.Low] - chart.lowestPrice)) ? ((chart.highest - chart.highestPrice) * chart.ratio + 40) : ((chart.highest - chart.lowestPrice) * chart.ratio - 40);
                 this.grid.context.save();
+                this.grid.context.fillStyle = this.color.bg;
+                this.grid.context.fillRect(
+                    chartW - chartM + barW,
+                    priceRangeLabelY - 10,
+                    1,
+                    12
+                );
                 this.grid.context.textAlign = "right";
                 this.grid.context.fillStyle = this.color.textWeak;
                 this.grid.context.font = "10px sans-serif";
                 this.grid.context.globalAlpha = 0.6;
                 this.grid.context.fillText(
-                    (chart.highestPrice - chart.lowestPrice).toString(10),
-                    chartW - chartM + barW - 4,
-                    ((chart.highestPrice - chart._bars[0][BarColumn.High]) > (chart._bars[0][BarColumn.Low] - chart.lowestPrice)) ? ((chart.highest - chart.highestPrice) * chart.ratio + 40) : ((chart.highest - chart.lowestPrice) * chart.ratio - 40)
+                    util.fixedDecimal(chart.highestPrice - chart.lowestPrice, decimalPower),
+                    chartW - chartM + barW + 6,
+                    priceRangeLabelY
                 );
                 this.grid.context.restore();
 
@@ -1778,6 +1786,8 @@ export class Kuromaty {
         color: string, lineDash: number[]) {
         
         x += 0.5;
+        y = Math.round(y);
+        h = Math.round(h);
 
         ctx.save();
 
@@ -1787,8 +1797,8 @@ export class Kuromaty {
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.setLineDash(lineDash);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + h);
+        ctx.moveTo(x, y + 1);
+        ctx.lineTo(x, y + h - 2);
         ctx.stroke();
 
         ctx.beginPath();
