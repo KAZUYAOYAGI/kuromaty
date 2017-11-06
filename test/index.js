@@ -118,7 +118,9 @@
                 ticker.ltp,
                 ticker.volume,
                 ticker.ask_depth,
-                ticker.bid_depth
+                ticker.bid_depth,
+                ticker.volume_sell,
+                ticker.volume_buy
             ]);
         }
 

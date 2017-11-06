@@ -10,8 +10,8 @@ import flagrate from "flagrate/lib/es6/flagrate";
 import { ContextMenu } from "flagrate/lib/es6/flagrate/context-menu";
 import { Decimal } from "decimal.js-light";
 
-/** time, open, high, low, close, volume, askDepth, bidDepth */
-export type Bar = [number, number, number, number, number, number, number, number];
+/** time, open, high, low, close, volume, askDepth, bidDepth, sellVolume, buyVolume */
+export type Bar = [number, number, number, number, number, number, number, number, number, number];
 const enum BarColumn {
     Time,
     Open,
@@ -20,17 +20,21 @@ const enum BarColumn {
     Close,
     Volume,
     AskDepth,
-    BidDepth
+    BidDepth,
+    SellVolume,
+    BuyVolume
 }
 
-/** time, ltp, volume, askDepth, bidDepth */
-export type Tick = [number, number, number, number, number];
+/** time, ltp, volume, askDepth, bidDepth, sellVolume, buyVolume */
+export type Tick = [number, number, number, number, number, number, number];
 const enum TickColumn {
     Time,
     Ltp,
     Volume,
     AskDepth,
-    BidDepth
+    BidDepth,
+    SellVolume,
+    BuyVolume
 }
 
 export interface Options {
@@ -305,7 +309,9 @@ export class Kuromaty {
                         tick[TickColumn.Ltp],
                         tick[TickColumn.Volume],
                         tick[TickColumn.AskDepth],
-                        tick[TickColumn.BidDepth]
+                        tick[TickColumn.BidDepth],
+                        tick[TickColumn.SellVolume],
+                        tick[TickColumn.BuyVolume]
                     ]);
                 } else {
                     chart.bars.unshift([
@@ -316,7 +322,9 @@ export class Kuromaty {
                         chart.ticks[0][TickColumn.Ltp],
                         chart.ticks[0][TickColumn.Volume],
                         chart.ticks[0][TickColumn.AskDepth],
-                        chart.ticks[0][TickColumn.BidDepth]
+                        chart.ticks[0][TickColumn.BidDepth],
+                        chart.ticks[0][TickColumn.SellVolume],
+                        chart.ticks[0][TickColumn.BuyVolume]
                     ]);
                 }
 
@@ -337,6 +345,12 @@ export class Kuromaty {
             }
             bar[BarColumn.AskDepth] = tick[TickColumn.AskDepth];
             bar[BarColumn.BidDepth] = tick[TickColumn.BidDepth];
+            if (bar[BarColumn.SellVolume] < tick[TickColumn.SellVolume]) {
+                bar[BarColumn.SellVolume] = tick[TickColumn.SellVolume];
+            }
+            if (bar[BarColumn.BuyVolume] < tick[TickColumn.BuyVolume]) {
+                bar[BarColumn.BuyVolume] = tick[TickColumn.BuyVolume];
+            }
         }
 
         this._hasUpdated = true;
@@ -852,6 +866,12 @@ export class Kuromaty {
             }// bars
 
             if (chart.selected) {
+                // LTP Position (Y)
+                let ltpp = Math.round((chart.highest - chart.latest) * chart.ratio);
+                if (!ltpp) {
+                    ltpp = Math.round(canvasH / 2);
+                }
+
                 // horizontal grid (price)
                 let lp = Infinity, cp = 0, add = decimal === 1 ? 1000 : 100 / decimal;
                 if (period === 0) {
@@ -915,20 +935,60 @@ export class Kuromaty {
                 );
                 this.grid.context.restore();
 
+                // Last Sell/Buy Volume Indicator (experimental)
+                if (chartI === 0) {
+                    this.overlay.context.save();
+
+                    if (chart._bars[0][BarColumn.SellVolume] > chart._bars[0][BarColumn.BuyVolume]) {
+                        let grad = this.overlay.context.createLinearGradient(0, 1, 0, ltpp - 2);
+                        grad.addColorStop(0, this.color.askOrder);
+                        grad.addColorStop(1, "rgba(0,0,0,0)");
+                        this.overlay.context.fillStyle = grad;
+                        this.overlay.context.globalAlpha = (chart._bars[0][BarColumn.SellVolume] - chart._bars[0][BarColumn.BuyVolume]) / chart._bars[0][BarColumn.Volume];
+                        this.overlay.context.fillRect(chartW - 1, 1, -4, ltpp - 2);
+                    } else if (chart._bars[0][BarColumn.SellVolume] < chart._bars[0][BarColumn.BuyVolume]) {
+                        let grad = this.overlay.context.createLinearGradient(0, ltpp + 1, 0, chartH);
+                        grad.addColorStop(0, "rgba(0,0,0,0)");
+                        grad.addColorStop(1, this.color.bidOrder);
+                        this.overlay.context.fillStyle = grad;
+                        this.overlay.context.globalAlpha = (chart._bars[0][BarColumn.BuyVolume] - chart._bars[0][BarColumn.SellVolume]) / chart._bars[0][BarColumn.Volume];
+                        this.overlay.context.fillRect(chartW - 1, chartH - 1, -4, -(chartH - ltpp - 2));
+                    }
+
+                    this.overlay.context.restore();
+
+                    if (this.cursorX > -1) {
+                        this._drawDepthIndicator(
+                            this.overlay.context,
+                            chartW - chartM - 7,
+                            40,
+                            `Sell Vol. ${util.fixedDecimal(chart._bars[0][BarColumn.SellVolume], 1)}`,
+                            this.color.askOrder
+                        );
+                        this._drawDepthIndicator(
+                            this.overlay.context,
+                            chartW - chartM - 7,
+                            chartH - 40,
+                            `Buy Vol. ${util.fixedDecimal(chart._bars[0][BarColumn.BuyVolume], 1)}`,
+                            this.color.bidOrder
+                        );
+                    }
+                }
+
                 // Last Depth Indicator (v2.25)
                 if (chart._bars[0][BarColumn.AskDepth] && chart._bars[0][BarColumn.BidDepth]) {
                     this._drawDepthIndicator(
                         this.overlay.context,
                         chartW - chartM - 7,
-                        15,
-                        `Ask=${Math.round(chart._bars[0][BarColumn.AskDepth])}`,
+                        20,
+                        `Ask Depth ${Math.round(chart._bars[0][BarColumn.AskDepth])}`,
                         this.color.askDepthLast
                     );
                     this._drawDepthIndicator(
                         this.overlay.context,
                         chartW - chartM - 7,
-                        chartH - 15,
-                        `Bid=${Math.round(chart._bars[0][BarColumn.BidDepth])}`,
+                        chartH - 20,
+                        `Bid Depth ${Math.round(chart._bars[0][BarColumn.BidDepth])}`,
                         this.color.bidDepthLast
                     );
                 }
@@ -1032,11 +1092,6 @@ export class Kuromaty {
                 });
 
                 // LTP
-                let ltpp = Math.round((chart.highest - chart.latest) * chart.ratio);
-                if (!ltpp) {
-                    ltpp = Math.round(canvasH / 2);
-                }
-
                 let color = this.color.borderLTP;
                 if (chart.highestPrice === chart.latest) {
                     color = this.color.long;
@@ -1441,7 +1496,9 @@ export class Kuromaty {
                         hBars[i][BarColumn.Close],
                         hBars[i][BarColumn.Volume],
                         hBars[i][BarColumn.AskDepth] || 0,
-                        hBars[i][BarColumn.BidDepth] || 0
+                        hBars[i][BarColumn.BidDepth] || 0,
+                        hBars[i][BarColumn.SellVolume] || 0,
+                        hBars[i][BarColumn.BuyVolume] || 0
                     ]);
                     continue;
                 }
@@ -1456,6 +1513,8 @@ export class Kuromaty {
                 bars[0][BarColumn.Volume] += hBars[i][BarColumn.Volume];
                 bars[0][BarColumn.AskDepth] = hBars[i][BarColumn.AskDepth] || 0;
                 bars[0][BarColumn.BidDepth] = hBars[i][BarColumn.BidDepth] || 0;
+                bars[0][BarColumn.SellVolume] += hBars[i][BarColumn.SellVolume] || 0;
+                bars[0][BarColumn.BuyVolume] += hBars[i][BarColumn.BuyVolume] || 0;
             }
         }
 
@@ -1493,7 +1552,9 @@ export class Kuromaty {
                     mBars[i][BarColumn.Close],
                     mBars[i][BarColumn.Volume],
                     mBars[i][BarColumn.AskDepth] || 0,
-                    mBars[i][BarColumn.BidDepth] || 0
+                    mBars[i][BarColumn.BidDepth] || 0,
+                    mBars[i][BarColumn.SellVolume] || 0,
+                    mBars[i][BarColumn.BuyVolume] || 0
                 ]);
                 continue;
             }
@@ -1508,6 +1569,8 @@ export class Kuromaty {
             bars[0][BarColumn.Volume] += mBars[i][BarColumn.Volume];
             bars[0][BarColumn.AskDepth] = mBars[i][BarColumn.AskDepth] || 0;
             bars[0][BarColumn.BidDepth] = mBars[i][BarColumn.BidDepth] || 0;
+            bars[0][BarColumn.SellVolume] += mBars[i][BarColumn.SellVolume] || 0;
+            bars[0][BarColumn.BuyVolume] += mBars[i][BarColumn.BuyVolume] || 0;
         }
 
         return bars.slice(0, barCount);
@@ -1891,16 +1954,16 @@ export class Kuromaty {
         ctx.textAlign = "right";
         ctx.fillStyle = this.color.textWeak;
         ctx.strokeStyle = this.color.bg;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.5;
         ctx.font = "10px sans-serif";
         ctx.strokeText(
             value,
-            x - 12,
+            x - 13,
             y + 3.5
         );
         ctx.fillText(
             value,
-            x - 12,
+            x - 13,
             y + 3.5
         );
 
