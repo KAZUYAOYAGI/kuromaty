@@ -106,7 +106,7 @@
 
     kuro.socket.on("ticker", function (ticker) {
 
-        var index = symbols.indexOf(ticker.product_code);
+        var index = symbols.indexOf(ticker.symbol);
         var len = kuromaty.charts[index]._bars && kuromaty.charts[index]._bars.length || 0;
 
         if (index !== null) {
@@ -117,8 +117,8 @@
                 new Date(ticker.timestamp).getTime(),
                 ticker.ltp,
                 ticker.volume,
-                ticker.total_ask_depth,
-                ticker.total_bid_depth
+                ticker.ask_depth,
+                ticker.bid_depth
             ]);
         }
 
@@ -289,7 +289,7 @@
     // データ要求
     kuro.socket.on("ready", function () {
         symbols.forEach(function (symbol) {
-            kuro.socket.emit("join", "lightning_ticker_" + symbol);
+            kuro.socket.emit("join", symbol);
         });
     });
 
