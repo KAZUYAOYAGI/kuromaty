@@ -2112,6 +2112,7 @@ if (window.Kuromaty === undefined) {
 
 declare global {
     interface Window {
+        // @ts-ignore
         Kuromaty: typeof Kuromaty;
     }
 }
