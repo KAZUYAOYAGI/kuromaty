@@ -942,13 +942,13 @@ export class Kuromaty {
                     if (chart._bars[0][BarColumn.SellVolume] > chart._bars[0][BarColumn.BuyVolume]) {
                         let grad = this.overlay.context.createLinearGradient(0, 1, 0, ltpp - 2);
                         grad.addColorStop(0, this.color.askOrder);
-                        grad.addColorStop(1, "rgba(0,0,0,0)");
+                        grad.addColorStop(1, this.color.bg);
                         this.overlay.context.fillStyle = grad;
                         this.overlay.context.globalAlpha = (chart._bars[0][BarColumn.SellVolume] - chart._bars[0][BarColumn.BuyVolume]) / chart._bars[0][BarColumn.Volume];
                         this.overlay.context.fillRect(chartW - 1, 1, -4, ltpp - 2);
                     } else if (chart._bars[0][BarColumn.SellVolume] < chart._bars[0][BarColumn.BuyVolume]) {
                         let grad = this.overlay.context.createLinearGradient(0, ltpp + 1, 0, chartH);
-                        grad.addColorStop(0, "rgba(0,0,0,0)");
+                        grad.addColorStop(0, this.color.bg);
                         grad.addColorStop(1, this.color.bidOrder);
                         this.overlay.context.fillStyle = grad;
                         this.overlay.context.globalAlpha = (chart._bars[0][BarColumn.BuyVolume] - chart._bars[0][BarColumn.SellVolume]) / chart._bars[0][BarColumn.Volume];
@@ -1375,6 +1375,7 @@ export class Kuromaty {
             this.overlay.context.save();
             this.overlay.context.font = "bold 11px sans-serif";
             this.overlay.context.textAlign = "left";
+            this.overlay.context.strokeStyle = this.color.bg;
             this.overlay.context.fillStyle = margin < 0 ? this.color.short : this.color.long;
             this.overlay.context.strokeText(marginText, 10, 80);
             this.overlay.context.fillText(marginText, 10, 80);
@@ -1832,7 +1833,7 @@ export class Kuromaty {
 
         ctx.save();
 
-        ctx.globalCompositeOperation = "lighter";
+        ctx.globalCompositeOperation = "destination-over";
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.strokeStyle = color;
