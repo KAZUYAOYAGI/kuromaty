@@ -1,6 +1,6 @@
 {
   "name": "kuromaty",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "description": "Financial Bar Chart Library for Kuromachart.",
   "homepage": "https://kuromat.ch/",
   "main": "lib/es6/kuromaty.js",
@@ -26,7 +26,7 @@
     "browserify": "^14.4.0",
     "decimal.js-light": "^2.2.3",
     "del": "^3.0.0",
-    "flagrate": "^1.0.0-beta.23",
+    "flagrate": "^1.0.0-beta.25",
     "gulp": "^3.9.1",
     "gulp-clean-css": "^3.7.0",
     "gulp-less": "^3.3.2",
