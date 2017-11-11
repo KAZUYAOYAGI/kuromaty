@@ -48,6 +48,7 @@ export interface Options {
     pricePopEffect?: boolean;
     quickOrder?: boolean;
     showPositions?: boolean;
+    mergePositions?: boolean;
     showOrders?: boolean;
     quickOrderHandler?: (order: QuickOrder) => void;
 }
@@ -203,6 +204,12 @@ export class Kuromaty {
         }
         if (options.chartOverlay === undefined) {
             options.chartOverlay = false;
+        }
+        if (options.showPositions === undefined) {
+            options.showPositions = true;
+        }
+        if (options.showOrders === undefined) {
+            options.showOrders = true;
         }
         options.barWidth = options.barWidth || 5;
         options.barMargin = options.barMargin || 3;
@@ -1384,6 +1391,17 @@ export class Kuromaty {
 
     private _drawPositionMarkers(chart: Chart, chartW: number) {
         if (!this.options.showPositions) {
+            return;
+        }
+
+        if (this.options.mergePositions) {
+            const position = this._positions.getMergedPosition();
+            this._drawPositionMarker(this.overlay.context,
+                0,
+                Math.round((chart.highest - position.price.toNumber()) * chart.ratio),
+                chartW,
+                position,
+                chart.latest);
             return;
         }
 
