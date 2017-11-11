@@ -2,9 +2,9 @@
     Copyright 2017 Kuromatch
 */
 import * as util from "./util";
-import { Position as _Position, PositionLike, Side as PositionSide } from "./Position";
+import { Position, PositionLike, Side as PositionSide } from "./Position";
 import { PositionSet } from "./PositionSet";
-import { Order as _Order, OrderLike } from "./Order";
+import { Order, OrderLike } from "./Order";
 import { OrderSet } from "./OrderSet";
 import flagrate from "flagrate/lib/es6/flagrate";
 import { ContextMenu } from "flagrate/lib/es6/flagrate/context-menu";
@@ -47,6 +47,8 @@ export interface Options {
     boardGroupSize?: number;
     pricePopEffect?: boolean;
     quickOrder?: boolean;
+    showPositions?: boolean;
+    showOrders?: boolean;
     quickOrderHandler?: (order: QuickOrder) => void;
 }
 
@@ -1068,28 +1070,10 @@ export class Kuromaty {
                 });
 
                 // Positions (testing)
-                this._positions.forEach(position => {
-                    this._drawPositionMarker(
-                        this.overlay.context,
-                        0,
-                        Math.round((chart.highest - position.price) * chart.ratio),
-                        chartW,
-                        position,
-                        chart.latest
-                    );
-                });
+                this._drawPositionMarkers(chart, chartW);
 
                 // Orders (testing)
-                this._orders.forEach(order => {
-                    this._drawOrderMarker(
-                        this.overlay.context,
-                        0,
-                        Math.round((chart.highest - order.price) * chart.ratio),
-                        chartW,
-                        order,
-                        chart.latest
-                    );
-                });
+                this._drawOrderMarkers(chart, chartW);
 
                 // LTP
                 let color = this.color.borderLTP;
@@ -1386,6 +1370,31 @@ export class Kuromaty {
             this._afs--;
             this._hasUpdated = true;
         }
+    }
+
+    private _drawOrderMarkers(chart: Chart, chartW: number) {
+        if (!this.options.showOrders) {
+            return;
+        }
+
+        this._orders.forEach(order => {
+            this._drawOrderMarker(this.overlay.context, 0, Math.round((chart.highest - order.price) * chart.ratio), chartW, order, chart.latest);
+        });
+    }
+
+    private _drawPositionMarkers(chart: Chart, chartW: number) {
+        if (!this.options.showPositions) {
+            return;
+        }
+
+        this._positions.forEach(position => {
+            this._drawPositionMarker(this.overlay.context,
+                0,
+                Math.round((chart.highest - position.price) * chart.ratio),
+                chartW,
+                position,
+                chart.latest);
+        });
     }
 
     private _drawPricePopEffect(chart: Chart, decimal: number, chartW: number, ltpp: number): void {
@@ -1972,7 +1981,7 @@ export class Kuromaty {
     }
 
     private _drawPositionMarker(ctx: CanvasRenderingContext2D,
-        x: number, y: number, w: number, position: _Position, ltp: number) {
+                                x: number, y: number, w: number, position: Position, ltp: number) {
 
         const color = position.side === "L" ? this.color.long : this.color.short;
         const margin = Math.floor(position.marginAgainst(ltp));
@@ -2013,7 +2022,7 @@ export class Kuromaty {
     }
 
     private _drawOrderMarker(ctx: CanvasRenderingContext2D,
-        x: number, y: number, w: number, order: _Order, ltp: number) {
+                             x: number, y: number, w: number, order: Order, ltp: number) {
 
         let color = this.color.text;
         switch (order.side) {
