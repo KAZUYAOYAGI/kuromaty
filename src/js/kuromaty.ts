@@ -769,7 +769,7 @@ export class Kuromaty {
 
                         this.overlay.context.textAlign = (i < l / 2) ? "right" : "left";
                         this.overlay.context.fillText(
-                            util.fixedDecimal(bar[BarColumn.High], decimalPower),
+                            new Decimal(bar[BarColumn.High]).toFixed(decimalPower),
                             barX - ((i < l / 2) ? 0 : 5),
                             hpY - 8
                         );
@@ -802,7 +802,7 @@ export class Kuromaty {
 
                         this.overlay.context.textAlign = (i < l / 2) ? "right" : "left";
                         this.overlay.context.fillText(
-                            util.fixedDecimal(bar[BarColumn.Low], decimalPower),
+                            new Decimal(bar[BarColumn.Low]).toFixed(decimalPower),
                             barX - ((i < l / 2) ? 0 : 5),
                             lpY + 15
                         );
@@ -897,7 +897,7 @@ export class Kuromaty {
                     this.grid.context.font = "11px sans-serif";
                     this.grid.context.textAlign = "left";
                     this.grid.context.fillText(
-                        util.fixedDecimal(i, decimalPower),
+                        new Decimal(i).toFixed(decimalPower),
                         chartW + 2,
                         cp + 5,
                         39
@@ -929,7 +929,7 @@ export class Kuromaty {
                 this.grid.context.font = "10px sans-serif";
                 this.grid.context.globalAlpha = 0.6;
                 this.grid.context.fillText(
-                    util.fixedDecimal(chart.highestPrice - chart.lowestPrice, decimalPower),
+                    new Decimal(chart.highestPrice - chart.lowestPrice).toFixed(decimalPower),
                     chartW - chartM + barW + 6,
                     priceRangeLabelY
                 );
@@ -962,14 +962,14 @@ export class Kuromaty {
                             this.overlay.context,
                             chartW - chartM - 7,
                             40,
-                            `Sell Vol. ${util.fixedDecimal(chart._bars[0][BarColumn.SellVolume], 1)}`,
+                            `Sell Vol. ${new Decimal(chart._bars[0][BarColumn.SellVolume]).toFixed(1)}`,
                             this.color.askOrder
                         );
                         this._drawDepthIndicator(
                             this.overlay.context,
                             chartW - chartM - 7,
                             chartH - 40,
-                            `Buy Vol. ${util.fixedDecimal(chart._bars[0][BarColumn.BuyVolume], 1)}`,
+                            `Buy Vol. ${new Decimal(chart._bars[0][BarColumn.BuyVolume]).toFixed(1)}`,
                             this.color.bidOrder
                         );
                     }
@@ -1276,10 +1276,10 @@ export class Kuromaty {
                 this.overlay.context.fillText(
                     (
                         barDate.toLocaleString() +
-                        `  O ${util.fixedDecimal(chart._bars[i][BarColumn.Open], decimalPower)}` +
-                        `  H ${util.fixedDecimal(chart._bars[i][BarColumn.High], decimalPower)}` +
-                        `  L ${util.fixedDecimal(chart._bars[i][BarColumn.Low], decimalPower)}` +
-                        `  C ${util.fixedDecimal(chart._bars[i][BarColumn.Close], decimalPower)}` +
+                        `  O ${new Decimal(chart._bars[i][BarColumn.Open]).toFixed(decimalPower)}` +
+                        `  H ${new Decimal(chart._bars[i][BarColumn.High]).toFixed(decimalPower)}` +
+                        `  L ${new Decimal(chart._bars[i][BarColumn.Low]).toFixed(decimalPower)}` +
+                        `  C ${new Decimal(chart._bars[i][BarColumn.Close]).toFixed(decimalPower)}` +
                         `  ${util.toStringWithSign(diff)}%`
                     ),
                     10,
@@ -1905,7 +1905,7 @@ export class Kuromaty {
         ctx.fillStyle = textColor;
         ctx.font = "11px sans-serif";
         ctx.fillText(
-            util.fixedDecimal(price, this.options.decimalPower),
+            new Decimal(price).toFixed(this.options.decimalPower),
             w + 2,
             y + 5,
             39
@@ -1936,7 +1936,7 @@ export class Kuromaty {
         ctx.fillStyle = color;
         ctx.font = "11px sans-serif";
         ctx.fillText(
-            util.fixedDecimal(price, this.options.decimalPower),
+            new Decimal(price).toFixed(this.options.decimalPower),
             w + 2,
             y + 5,
             39
