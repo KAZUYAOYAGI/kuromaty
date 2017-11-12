@@ -9,10 +9,12 @@ import { OrderSet } from "./OrderSet";
 import flagrate from "flagrate/lib/es6/flagrate";
 import { ContextMenu } from "flagrate/lib/es6/flagrate/context-menu";
 import { Decimal } from "decimal.js-light";
+import {ChartDimensions, TechnicalDrawer} from "./TechnicalDrawer";
+import {SMADrawer} from "./technicals/SMADrawer";
 
 /** time, open, high, low, close, volume, askDepth, bidDepth, sellVolume, buyVolume */
 export type Bar = [number, number, number, number, number, number, number, number, number, number];
-const enum BarColumn {
+export const enum BarColumn {
     Time,
     Open,
     High,
@@ -172,6 +174,8 @@ export class Kuromaty {
     canvases: HTMLCanvasElement[];
     contexts: CanvasRenderingContext2D[];
 
+    technicalDrawers: {[name: string]: TechnicalDrawer};
+
     private _dpr = window.devicePixelRatio;
     private _rootContainer: HTMLDivElement;
     private _chartContainer: HTMLDivElement;
@@ -206,6 +210,8 @@ export class Kuromaty {
         options.barMargin = options.barMargin || 3;
         options.decimalPower = options.decimalPower || 0;
         this._decimal = parseInt("1" + Array(options.decimalPower + 1).join("0"), 10);
+
+        this.technicalDrawers = {SMA: new SMADrawer()};
 
         this._create();
 
@@ -539,7 +545,7 @@ export class Kuromaty {
         this.contexts.forEach(context => {
             context.scale(this._dpr, this._dpr);
             context.imageSmoothingEnabled = false;
-        })
+        });
 
         const tick = () => {
 
@@ -563,8 +569,8 @@ export class Kuromaty {
             barW = this.options.barWidth + this.options.barMargin,
             chartW = canvasW - 45,
             chartH = canvasH - 16,
-            chartM = barW * Math.max(2, 5 - this.barIndex),
-            chartI = Math.max(0, this.barIndex - 3),
+            chartM = barW * Math.max(2, 5 - this.barIndex), // 右側の余白の幅 板や値幅などを表示
+            chartI = Math.max(0, this.barIndex - 3), // 表示対象の足の先頭位置
             barCount = Math.round((chartW - chartM) / barW) - 1,
             decimal = this._decimal,
             decimalPower = this.options.decimalPower,
@@ -1117,23 +1123,25 @@ export class Kuromaty {
         } // main
 
         // technical
+        const dimensions: ChartDimensions = {
+            width: chartW,
+            height: chartH,
+            rightMargin: chartM,
+            firstBarIndex: chartI,
+            barCount,
+            barMargin: this.options.barMargin,
+            barWidth: this.options.barWidth
+        };
+
         for (j = 0; j < m; j++) {
             const chart = this.charts[j];
             if (!chart.selected) {
                 break;
             }
 
-            const ctx = chart.context;
-            const barX = chartW - chartM - 0.5;
-
-            if (period === 0) {
-                // tick (special)
-                this._drawSMA(ctx, barX, chart, l, 1, this.color.text);
-            } else {
-                this._drawSMA(ctx, barX, chart, l, 10, this.color.lineMA1);
-                this._drawSMA(ctx, barX, chart, l, 21, this.color.lineMA2);
-                this._drawSMA(ctx, barX, chart, l, 34, this.color.lineMA3);
-            }
+            Object.keys(this.technicalDrawers).forEach(
+                name => this.technicalDrawers[name].draw(chart, dimensions, period, this.color)
+            );
         } // technical
 
         // datetime
@@ -2058,50 +2066,6 @@ export class Kuromaty {
             y - 5,
             76
         );
-
-        ctx.restore();
-    }
-
-    private _drawSMA(ctx: CanvasRenderingContext2D,
-        x: number, chart: Chart, count: number, value: number, color: string) {
-
-        const barW = this.options.barMargin + this.options.barWidth;
-        x = x + barW;
-
-        ctx.save();
-
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        ctx.setLineDash([]);
-        ctx.beginPath();
-
-        let i = 0,
-            j,
-            bar,
-            p = 0,
-            y = 0;
-        for (; i < count; i++) {
-            if (!chart._bars[i] || !chart._bars[i + value]) {
-                break;
-            }
-            x -= barW;
-
-            p = 0;
-            for (j = 0; j < value; j++) {
-                p += chart._bars[i + j][BarColumn.Close];
-            }
-            p /= value;
-            y = Math.round((chart.highest - p) * chart.ratio) + 0.5;
-
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            }
-            ctx.lineTo(x, y);
-        }
-
-        ctx.stroke();
 
         ctx.restore();
     }
