@@ -39,6 +39,7 @@ gulp.task("tsc", () => {
             typescript: require("typescript"),
             target: "es6",
             module: "es6",
+            moduleResolution: "node",
             removeComments: false,
             declaration: true
         }));
@@ -51,6 +52,7 @@ gulp.task("tsc", () => {
             typescript: require("typescript"),
             target: "es6",
             module: "system",
+            moduleResolution: "node",
             removeComments: false,
             declaration: true,
             outFile: "kuromaty.js"
