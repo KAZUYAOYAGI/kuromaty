@@ -1,21 +1,22 @@
-"use strict";
-import {BarColumn, ColorOption} from "../kuromaty";
-import {Chart} from "../kuromaty";
-import {ChartDimensions, Overlay} from "../Overlay";
+import { BarColumn, ColorOption } from "../kuromaty";
+import { Chart } from "../kuromaty";
+import { ChartDimensions, Overlay } from "../Overlay";
 
 export class ParabolicSAR implements Overlay {
     minPeriod: number = 1;
     public options: Config = {
-        afStep: 0.02,
-        maxAf: 0.2,
+        afStep: 0.025,
+        maxAf: 0.050,
+        colorKey: "textWeak"
     };
 
     constructor(options: Options = {}) {
         Object.assign(this.options, options);
     }
 
-    draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {
-        const {maxAf, afStep} = this.options;
+    draw(chart: Chart, dimensions: ChartDimensions, color: ColorOption) {
+
+        const { maxAf, afStep } = this.options;
         const ctx = chart.context;
         const barW = dimensions.barMargin + dimensions.barWidth;
         const barX = dimensions.width - dimensions.rightMargin - Math.ceil(dimensions.barWidth / 2) + 0.5 /* hige width */;
@@ -29,13 +30,13 @@ export class ParabolicSAR implements Overlay {
         const oldestBarIndex = bars.length - 1;
         let af = afStep;
         let isUpTrend = false;
-        let ep = bars[oldestBarIndex -1][BarColumn.Low];
-        let sar = Math.max(bars[oldestBarIndex][BarColumn.High], bars[oldestBarIndex- 1][BarColumn.High]);
+        let ep = bars[oldestBarIndex - 1][BarColumn.Low];
+        let sar = Math.max(bars[oldestBarIndex][BarColumn.High], bars[oldestBarIndex - 1][BarColumn.High]);
         let x = barX - Math.min(barCount, oldestBarIndex) * barW;
 
         ctx.save();
 
-        ctx.fillStyle = colors.text;
+        ctx.fillStyle = color[this.options.colorKey];
         ctx.lineWidth = 1;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
@@ -66,7 +67,7 @@ export class ParabolicSAR implements Overlay {
 
             if (i < barCount) {
                 ctx.beginPath();
-                ctx.arc(x, (chart.highest - sar) * chart.ratio, 1,0, 2 * Math.PI);
+                ctx.arc(x, (chart.highest - sar) * chart.ratio, 1, 0, 2 * Math.PI);
                 ctx.fill();
                 x += barW;
             }
@@ -102,6 +103,7 @@ export class ParabolicSAR implements Overlay {
 export interface Config {
     afStep: number;
     maxAf: number;
+    colorKey: string;
 }
 
 export type Options = Partial<Config>;
