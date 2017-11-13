@@ -141,6 +141,8 @@
         decimalPower = 5;
     } else if (symbols[0] === "BCH_BTC") {
         decimalPower = 5;
+    } else if (symbols[0] === "BFX_BTC_USD") {
+        decimalPower = 1;
     }
 
     var kuromaty = kuro.kuromaty = new Kuromaty(kuro.element.kuromaty, {

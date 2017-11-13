@@ -1,0 +1,1 @@
+export { SMA } from "./SMA";

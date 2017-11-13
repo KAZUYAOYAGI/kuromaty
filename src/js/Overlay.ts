@@ -1,17 +1,16 @@
-"use strict";
-import {Chart, ColorOption} from "./kuromaty";
-import {JSONSchema4} from "json-schema";
+import { Chart, ColorOption } from "./kuromaty";
 
-export interface TechnicalDrawer {
+export interface Overlay {
+    minPeriod: number;
+    
     /**
-     * テクニカル指標を描画します
+     * Draws Overlay.
      *
      * @param {Chart} chart
      * @param {ChartDimensions} dimensions
-     * @param period
-     * @param {ColorOption} colors
+     * @param {ColorOption} color
      */
-    draw(chart: Chart, dimensions: ChartDimensions, period: number, colors: ColorOption);
+    draw(chart: Chart, dimensions: ChartDimensions, color: ColorOption);
 }
 
 export interface ChartDimensions {

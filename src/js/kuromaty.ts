@@ -9,8 +9,8 @@ import { OrderSet } from "./OrderSet";
 import flagrate from "flagrate/lib/es6/flagrate";
 import { ContextMenu } from "flagrate/lib/es6/flagrate/context-menu";
 import { Decimal } from "decimal.js-light";
-import {ChartDimensions, TechnicalDrawer} from "./TechnicalDrawer";
-import {SMADrawer} from "./technicals/SMADrawer";
+import { ChartDimensions, Overlay } from "./Overlay";
+import * as overlays from "./overlays/";
 
 /** time, open, high, low, close, volume, askDepth, bidDepth, sellVolume, buyVolume */
 export type Bar = [number, number, number, number, number, number, number, number, number, number];
@@ -174,7 +174,7 @@ export class Kuromaty {
     canvases: HTMLCanvasElement[];
     contexts: CanvasRenderingContext2D[];
 
-    technicalDrawers: {[name: string]: TechnicalDrawer};
+    overlays: { [name: string]: Overlay };
 
     private _dpr = window.devicePixelRatio;
     private _rootContainer: HTMLDivElement;
@@ -211,7 +211,11 @@ export class Kuromaty {
         options.decimalPower = options.decimalPower || 0;
         this._decimal = parseInt("1" + Array(options.decimalPower + 1).join("0"), 10);
 
-        this.technicalDrawers = {SMA: new SMADrawer()};
+        this.overlays = {
+            SMA1: new overlays.SMA({ period: 10, colorKey: "lineMA1" }),
+            SMA2: new overlays.SMA({ period: 21, colorKey: "lineMA2" }),
+            SMA3: new overlays.SMA({ period: 34, colorKey: "lineMA3" })
+        };
 
         this._create();
 
@@ -255,7 +259,7 @@ export class Kuromaty {
         });
 
         this._hasUpdated = true;
-        
+
         this._redraw();
     }
 
@@ -1120,7 +1124,7 @@ export class Kuromaty {
             }
         } // main
 
-        // technical
+        // overlays
         const dimensions: ChartDimensions = {
             width: chartW,
             height: chartH,
@@ -1137,10 +1141,12 @@ export class Kuromaty {
                 break;
             }
 
-            Object.keys(this.technicalDrawers).forEach(
-                name => this.technicalDrawers[name].draw(chart, dimensions, period, this.color)
-            );
-        } // technical
+            for (const name in this.overlays) {
+                if (this.overlays[name].minPeriod <= period) {
+                    this.overlays[name].draw(chart, dimensions, this.color);
+                }
+            }
+        } // overlays
 
         // datetime
         barDate = new Date(this.charts[0]._bars[0][BarColumn.Time]);
@@ -1215,7 +1221,7 @@ export class Kuromaty {
             this.cursorBoard = Math.round(this.cursorBoard);
             if (this.cursorBoard > 0) {
                 const cursorBoardPriceY = Math.round((chart.highest - this.cursorBoardPrice) * chart.ratio);
-                
+
                 this._drawBorder(
                     this.overlay.context,
                     chartW - 25,
@@ -1245,7 +1251,7 @@ export class Kuromaty {
                     cursorBoardPriceY + 3,
                     20
                 );
-                
+
                 this.overlay.context.restore();
             }
 
@@ -1348,7 +1354,7 @@ export class Kuromaty {
                     cursorPriceY + 5,
                     56
                 );
-                
+
                 this.overlay.context.restore();
             }
         } else {
@@ -1489,7 +1495,7 @@ export class Kuromaty {
             );
             for (; i >= backCount; i--) {
                 date = new Date(hBars[i][BarColumn.Time]);
-    
+
                 if (
                     bars.length === 0 ||
                     (
@@ -1511,7 +1517,7 @@ export class Kuromaty {
                     ]);
                     continue;
                 }
-    
+
                 if (bars[0][BarColumn.High] < hBars[i][BarColumn.High]) {
                     bars[0][BarColumn.High] = hBars[i][BarColumn.High];
                 }
@@ -1856,7 +1862,7 @@ export class Kuromaty {
     private _drawVerticalRange(ctx: CanvasRenderingContext2D,
         x: number, y: number, h: number,
         color: string, lineDash: number[]) {
-        
+
         x += 0.5;
         y = Math.round(y);
         h = Math.round(h);

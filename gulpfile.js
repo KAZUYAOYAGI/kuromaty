@@ -36,6 +36,7 @@ gulp.task("tsc", () => {
         ])
         .pipe(sourcemaps.init())
         .pipe(typescript({
+            alwaysStrict: true,
             typescript: require("typescript"),
             target: "es6",
             module: "es6",
@@ -49,6 +50,7 @@ gulp.task("tsc", () => {
             "src/js/**/*.ts"
         ])
         .pipe(typescript({
+            alwaysStrict: true,
             typescript: require("typescript"),
             target: "es6",
             module: "system",
