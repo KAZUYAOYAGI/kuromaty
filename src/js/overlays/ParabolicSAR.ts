@@ -18,7 +18,7 @@ export class ParabolicSAR implements Overlay {
         const {maxAf, afStep} = this.options;
         const ctx = chart.context;
         const barW = dimensions.barMargin + dimensions.barWidth;
-        const barX = dimensions.width - dimensions.rightMargin - Math.ceil(barW/2) + 2;
+        const barX = dimensions.width - dimensions.rightMargin - Math.ceil(dimensions.barWidth / 2) + 0.5 /* hige width */;
         const barCount = dimensions.barCount;
         const bars = chart._bars;
 
