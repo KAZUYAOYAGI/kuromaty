@@ -5,7 +5,7 @@ import { Chart } from "../kuromaty";
 export class SMA implements Overlay {
     minPeriod = 1;
 
-    options = {
+    options: Config = {
         period: 10,
         colorKey: "lineMA1"
     };
