@@ -5,7 +5,7 @@ import {ChartDimensions, Overlay} from "../Overlay";
 
 export class BollingerBand implements Overlay {
     minPeriod: number = 1;
-    public options = {
+    public options: Config = {
         periodLength: 20,
         factor: 2
     };
@@ -86,10 +86,12 @@ export class BollingerBand implements Overlay {
     }
 }
 
-export interface Options {
-    periodLength?: number;
-    factor?: number;
+export interface Config {
+    periodLength: number;
+    factor: number;
 }
+
+export type Options = Partial<Config>;
 
 interface BandPoint {
     average: number;

@@ -68,7 +68,10 @@ export class SMA implements Overlay {
     }
 }
 
-export interface Options {
-    period?: number;
-    colorKey?: string;
+export interface Config {
+    period: number;
+    colorKey: string;
 }
+
+export type Options = Partial<Config>;
+

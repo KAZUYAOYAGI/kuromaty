@@ -5,7 +5,7 @@ import {ChartDimensions, Overlay} from "../Overlay";
 
 export class ParabolicSAR implements Overlay {
     minPeriod: number = 1;
-    public options = {
+    public options: Config = {
         afStep: 0.02,
         maxAf: 0.2,
     };
@@ -99,7 +99,9 @@ export class ParabolicSAR implements Overlay {
     }
 }
 
-export interface Options {
-    afStep?: number;
-    maxAf?: number;
+export interface Config {
+    afStep: number;
+    maxAf: number;
 }
+
+export type Options = Partial<Config>;
