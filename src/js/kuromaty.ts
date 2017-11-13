@@ -868,7 +868,7 @@ export class Kuromaty {
             if (chart.selected) {
                 // LTP Position (Y)
                 let ltpp = Math.round((chart.highest - chart.latest) * chart.ratio);
-                if (!ltpp) {
+                if (!isFinite(ltpp)) {
                     ltpp = Math.round(canvasH / 2);
                 }
 
