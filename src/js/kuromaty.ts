@@ -601,7 +601,7 @@ export class Kuromaty {
 
             chart.context.clearRect(0, 0, canvasW, canvasH);
 
-            if (period === 0 && !chart.selected) {
+            if (!chart.selected) {
                 continue;
             }
 
@@ -689,7 +689,7 @@ export class Kuromaty {
             let ctx = chart.context;
             let barX = chartW - chartM;
 
-            if (period === 0 && !chart.selected) {
+            if (!chart.selected) {
                 continue;
             }
 
@@ -731,6 +731,7 @@ export class Kuromaty {
                     - Math.round(bar[BarColumn.Volume] * chart.volumeRatio)
                 );
 
+                // candlestick
                 if (period !== 0) {
                     // bar height
                     barH = Math.round((bar[BarColumn.Open] - bar[BarColumn.Close]) * chart.ratio);
@@ -1134,6 +1135,42 @@ export class Kuromaty {
             const chart = this.charts[j];
             if (!chart.selected) {
                 break;
+            }
+
+            if (period === 0) {
+                const ctx = chart.context;
+    
+                ctx.save();
+                
+                ctx.strokeStyle = this.color.text;
+                ctx.lineWidth = 1;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                ctx.setLineDash([]);
+                ctx.beginPath();
+        
+                let i = 0,
+                    p = 0,
+                    y = 0,
+                    x = chartW - chartM - 0.5 + barW;
+                for (; i < barCount; i++) {
+                    if (!chart._bars[i]) {
+                        break;
+                    }
+                    x -= barW;
+        
+                    p = chart._bars[i][BarColumn.Close];
+                    y = Math.round((chart.highest - p) * chart.ratio) + 0.5;
+        
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    }
+                    ctx.lineTo(x, y);
+                }
+        
+                ctx.stroke();
+        
+                ctx.restore();
             }
 
             for (const name in this.overlays) {
