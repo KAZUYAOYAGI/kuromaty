@@ -1,10 +1,10 @@
-"use strict";
-import {BarColumn, ColorOption} from "../kuromaty";
-import {Chart} from "../kuromaty";
-import {ChartDimensions, Overlay} from "../Overlay";
+import { BarColumn, ColorOption } from "../kuromaty";
+import { Chart } from "../kuromaty";
+import { ChartDimensions, Overlay } from "../Overlay";
 
 export class ParabolicSAR implements Overlay {
     minPeriod: number = 1;
+
     public options: Config = {
         afStep: 0.02,
         maxAf: 0.2,
@@ -15,10 +15,11 @@ export class ParabolicSAR implements Overlay {
     }
 
     draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {
-        const {maxAf, afStep} = this.options;
+        
+        const { maxAf, afStep } = this.options;
         const ctx = chart.context;
         const barW = dimensions.barMargin + dimensions.barWidth;
-        const barX = dimensions.width - dimensions.rightMargin - Math.ceil(barW/2) + 2;
+        const barX = dimensions.width - dimensions.rightMargin - Math.ceil(barW / 2) + 2;
         const barCount = dimensions.barCount;
         const bars = chart._bars;
 
@@ -29,8 +30,8 @@ export class ParabolicSAR implements Overlay {
         const oldestBarIndex = bars.length - 1;
         let af = afStep;
         let isUpTrend = false;
-        let ep = bars[oldestBarIndex -1][BarColumn.Low];
-        let sar = Math.max(bars[oldestBarIndex][BarColumn.High], bars[oldestBarIndex- 1][BarColumn.High]);
+        let ep = bars[oldestBarIndex - 1][BarColumn.Low];
+        let sar = Math.max(bars[oldestBarIndex][BarColumn.High], bars[oldestBarIndex - 1][BarColumn.High]);
         let x = barX - Math.min(barCount, oldestBarIndex) * barW;
 
         ctx.save();
@@ -66,7 +67,7 @@ export class ParabolicSAR implements Overlay {
 
             if (i < barCount) {
                 ctx.beginPath();
-                ctx.arc(x, (chart.highest - sar) * chart.ratio, 1,0, 2 * Math.PI);
+                ctx.arc(x, (chart.highest - sar) * chart.ratio, 1, 0, 2 * Math.PI);
                 ctx.fill();
                 x += barW;
             }

@@ -74,4 +74,3 @@ export interface Config {
 }
 
 export type Options = Partial<Config>;
-

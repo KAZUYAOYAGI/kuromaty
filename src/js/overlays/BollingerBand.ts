@@ -1,10 +1,10 @@
-"use strict";
-import {BarColumn, ColorOption} from "../kuromaty";
-import {Chart} from "../kuromaty";
-import {ChartDimensions, Overlay} from "../Overlay";
+import { BarColumn, ColorOption } from "../kuromaty";
+import { Chart } from "../kuromaty";
+import { ChartDimensions, Overlay } from "../Overlay";
 
 export class BollingerBand implements Overlay {
     minPeriod: number = 1;
+
     public options: Config = {
         periodLength: 20,
         factor: 2
@@ -15,6 +15,7 @@ export class BollingerBand implements Overlay {
     }
 
     draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {
+
         const options = this.options;
         const ctx = chart.context;
         const barX = dimensions.width - dimensions.rightMargin - 0.5;
@@ -38,14 +39,14 @@ export class BollingerBand implements Overlay {
 
         // 上の線
         ctx.beginPath();
-        ctx.moveTo(barX , pointToY(band[0], 1));
+        ctx.moveTo(barX, pointToY(band[0], 1));
         for (let i = 1, x = barX; i < bandLength; i++) {
             x -= barW;
             ctx.lineTo(x, pointToY(band[i], 1));
         }
 
         // 下の線
-        ctx.moveTo(barX , pointToY(band[0], -1));
+        ctx.moveTo(barX, pointToY(band[0], -1));
         for (let i = 1, x = barX; i < bandLength; i++) {
             x -= barW;
             ctx.lineTo(x, pointToY(band[i], -1));
@@ -61,8 +62,10 @@ export class BollingerBand implements Overlay {
     }
 
     private calculateBollingerBand(chart: Chart, count: number) {
+
         const periodLength = this.options.periodLength;
         const band: BandPoint[] = [];
+        
         for (let i = 0; i < count; i++) {
             if (!chart._bars[i] || !chart._bars[i + periodLength]) {
                 break;

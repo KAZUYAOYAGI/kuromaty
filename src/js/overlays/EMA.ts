@@ -1,10 +1,10 @@
-"use strict";
-import {BarColumn, ColorOption} from "../kuromaty";
-import {Chart} from "../kuromaty";
-import {ChartDimensions, Overlay} from "../Overlay";
+import { BarColumn, ColorOption } from "../kuromaty";
+import { Chart } from "../kuromaty";
+import { ChartDimensions, Overlay } from "../Overlay";
 
 export class EMA implements Overlay {
     minPeriod: number = 1;
+
     public options = {
         period: 20,
         colorKey: "lineMA1"
@@ -15,6 +15,7 @@ export class EMA implements Overlay {
     }
 
     draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {
+
         const ctx = chart.context;
         const barX = dimensions.width - dimensions.rightMargin - 0.5;
         const barW = dimensions.barMargin + dimensions.barWidth;
@@ -34,7 +35,7 @@ export class EMA implements Overlay {
         ctx.setLineDash([]);
 
         ctx.beginPath();
-        ctx.moveTo(barX , pointToY(ema[0]));
+        ctx.moveTo(barX, pointToY(ema[0]));
         const emaLength = Math.min(ema.length, barCount);
         for (let i = 0, x = barX; i < emaLength; i++) {
             x -= barW;
@@ -50,6 +51,7 @@ export class EMA implements Overlay {
     }
 
     private calculateEMA(chart: Chart) {
+        
         const ema: number[] = [];
         const period = this.options.period;
         const bars = chart._bars;
