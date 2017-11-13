@@ -174,6 +174,11 @@
         lineMA2: "#48758e",
         lineMA3: "#67305a"
     });
+
+    kuromaty.overlays["BollingerBand"] = new Kuromaty.overlays.BollingerBand();
+    kuromaty.overlays["ParabolicSAR"] = new Kuromaty.overlays.ParabolicSAR();
+    kuromaty.overlays["EMA"] = new Kuromaty.overlays.EMA();
+
     document.body.style.background = kuromaty.color.bg;
 
     // リサイズハンドラ

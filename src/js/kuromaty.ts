@@ -175,6 +175,7 @@ export class Kuromaty {
     contexts: CanvasRenderingContext2D[];
 
     overlays: { [name: string]: Overlay };
+    static readonly overlays = overlays;
 
     private _dpr = window.devicePixelRatio;
     private _rootContainer: HTMLDivElement;
