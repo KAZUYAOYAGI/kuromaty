@@ -20,7 +20,7 @@ export class EMA implements Overlay {
         const barX = dimensions.width - dimensions.rightMargin - 0.5;
         const barW = dimensions.barMargin + dimensions.barWidth;
         const barCount = dimensions.barCount;
-        const ema = this.calculateEMA(chart);
+        const ema = this.calculateEMA(chart, barCount);
 
         if (ema.length === 0) {
             return;
@@ -50,12 +50,12 @@ export class EMA implements Overlay {
         }
     }
 
-    private calculateEMA(chart: Chart) {
+    private calculateEMA(chart: Chart, barCount) {
         
         const ema: number[] = [];
         const period = this.options.period;
         const bars = chart._bars;
-        const maxIndex = bars.length - period;
+        const maxIndex = Math.min(bars.length - period, barCount);
 
         if (bars.length < period) {
             return [];
@@ -67,7 +67,7 @@ export class EMA implements Overlay {
             // 初期値を計算
             let sum = 0;
             for (let i = 0; i < period; i++) {
-                sum += bars[maxIndex - i][BarColumn.Close];
+                sum += bars[maxIndex + i][BarColumn.Close];
             }
             avg = sum / period;
         }
