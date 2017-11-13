@@ -175,9 +175,13 @@
         lineMA3: "#67305a"
     });
 
-    kuromaty.overlays["BollingerBand"] = new Kuromaty.overlays.BollingerBand();
-    kuromaty.overlays["ParabolicSAR"] = new Kuromaty.overlays.ParabolicSAR();
-    kuromaty.overlays["EMA"] = new Kuromaty.overlays.EMA();
+    kuromaty.overlays = {
+        EMA1: new Kuromaty.overlays.EMA({ period: 10, colorKey: "lineMA1" }),
+        EMA2: new Kuromaty.overlays.EMA({ period: 21, colorKey: "lineMA2" }),
+        EMA3: new Kuromaty.overlays.EMA({ period: 100, colorKey: "lineMA3" }),
+        BollingerBand: new Kuromaty.overlays.BollingerBand(),
+        ParabolicSAR: new Kuromaty.overlays.ParabolicSAR()
+    };
 
     document.body.style.background = kuromaty.color.bg;
 

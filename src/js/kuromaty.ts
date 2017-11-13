@@ -174,7 +174,7 @@ export class Kuromaty {
     canvases: HTMLCanvasElement[];
     contexts: CanvasRenderingContext2D[];
 
-    overlays: { [name: string]: Overlay };
+    overlays: { [name: string]: Overlay } = {};
     static readonly overlays = overlays;
 
     private _dpr = window.devicePixelRatio;
@@ -211,12 +211,6 @@ export class Kuromaty {
         options.barMargin = options.barMargin || 3;
         options.decimalPower = options.decimalPower || 0;
         this._decimal = parseInt("1" + Array(options.decimalPower + 1).join("0"), 10);
-
-        this.overlays = {
-            SMA1: new overlays.SMA({ period: 10, colorKey: "lineMA1" }),
-            SMA2: new overlays.SMA({ period: 21, colorKey: "lineMA2" }),
-            SMA3: new overlays.SMA({ period: 34, colorKey: "lineMA3" })
-        };
 
         this._create();
 
