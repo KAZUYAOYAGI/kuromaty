@@ -6,16 +6,17 @@ export class ParabolicSAR implements Overlay {
     minPeriod: number = 1;
 
     public options: Config = {
-        afStep: 0.02,
-        maxAf: 0.2,
+        afStep: 0.025,
+        maxAf: 0.050,
+        colorKey: "textWeak"
     };
 
     constructor(options: Options = {}) {
         Object.assign(this.options, options);
     }
 
-    draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {
-        
+    draw(chart: Chart, dimensions: ChartDimensions, color: ColorOption) {
+
         const { maxAf, afStep } = this.options;
         const ctx = chart.context;
         const barW = dimensions.barMargin + dimensions.barWidth;
@@ -36,7 +37,7 @@ export class ParabolicSAR implements Overlay {
 
         ctx.save();
 
-        ctx.fillStyle = colors.text;
+        ctx.fillStyle = color[this.options.colorKey];
         ctx.lineWidth = 1;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
@@ -103,6 +104,7 @@ export class ParabolicSAR implements Overlay {
 export interface Config {
     afStep: number;
     maxAf: number;
+    colorKey: string;
 }
 
 export type Options = Partial<Config>;

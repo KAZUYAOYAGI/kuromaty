@@ -7,14 +7,15 @@ export class BollingerBand implements Overlay {
 
     public options: Config = {
         periodLength: 20,
-        factor: 2
+        factor: 2,
+        colorKey: "grid"
     };
 
     constructor(options: Options = {}) {
         Object.assign(this.options, options);
     }
 
-    draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {
+    draw(chart: Chart, dimensions: ChartDimensions, color: ColorOption) {
 
         const options = this.options;
         const ctx = chart.context;
@@ -31,7 +32,7 @@ export class BollingerBand implements Overlay {
 
         ctx.save();
 
-        ctx.strokeStyle = "rgba(119, 119, 119, 0.8)";
+        ctx.strokeStyle = color[this.options.colorKey];
         ctx.lineWidth = 1;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
@@ -65,7 +66,7 @@ export class BollingerBand implements Overlay {
 
         const periodLength = this.options.periodLength;
         const band: BandPoint[] = [];
-        
+
         for (let i = 0; i < count; i++) {
             if (!chart._bars[i] || !chart._bars[i + periodLength]) {
                 break;
@@ -92,6 +93,7 @@ export class BollingerBand implements Overlay {
 export interface Config {
     periodLength: number;
     factor: number;
+    colorKey: string;
 }
 
 export type Options = Partial<Config>;
