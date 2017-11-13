@@ -936,43 +936,41 @@ export class Kuromaty {
                 this.grid.context.restore();
 
                 // Last Sell/Buy Volume Indicator (experimental)
-                if (chartI === 0) {
-                    this.overlay.context.save();
+                this.overlay.context.save();
 
-                    if (chart._bars[0][BarColumn.SellVolume] > chart._bars[0][BarColumn.BuyVolume]) {
-                        let grad = this.overlay.context.createLinearGradient(0, 1, 0, ltpp - 2);
-                        grad.addColorStop(0, this.color.askOrder);
-                        grad.addColorStop(1, this.color.bg);
-                        this.overlay.context.fillStyle = grad;
-                        this.overlay.context.globalAlpha = (chart._bars[0][BarColumn.SellVolume] - chart._bars[0][BarColumn.BuyVolume]) / chart._bars[0][BarColumn.Volume];
-                        this.overlay.context.fillRect(chartW - 1, 1, -4, ltpp - 2);
-                    } else if (chart._bars[0][BarColumn.SellVolume] < chart._bars[0][BarColumn.BuyVolume]) {
-                        let grad = this.overlay.context.createLinearGradient(0, ltpp + 1, 0, chartH);
-                        grad.addColorStop(0, this.color.bg);
-                        grad.addColorStop(1, this.color.bidOrder);
-                        this.overlay.context.fillStyle = grad;
-                        this.overlay.context.globalAlpha = (chart._bars[0][BarColumn.BuyVolume] - chart._bars[0][BarColumn.SellVolume]) / chart._bars[0][BarColumn.Volume];
-                        this.overlay.context.fillRect(chartW - 1, chartH - 1, -4, -(chartH - ltpp - 2));
-                    }
+                if (chart._bars[0][BarColumn.SellVolume] > chart._bars[0][BarColumn.BuyVolume]) {
+                    let grad = this.overlay.context.createLinearGradient(0, 1, 0, ltpp - 2);
+                    grad.addColorStop(0, this.color.askOrder);
+                    grad.addColorStop(1, this.color.bg);
+                    this.overlay.context.fillStyle = grad;
+                    this.overlay.context.globalAlpha = (chart._bars[0][BarColumn.SellVolume] - chart._bars[0][BarColumn.BuyVolume]) / chart._bars[0][BarColumn.Volume];
+                    this.overlay.context.fillRect(chartW - 1, 1, -4, ltpp - 2);
+                } else if (chart._bars[0][BarColumn.SellVolume] < chart._bars[0][BarColumn.BuyVolume]) {
+                    let grad = this.overlay.context.createLinearGradient(0, ltpp + 1, 0, chartH);
+                    grad.addColorStop(0, this.color.bg);
+                    grad.addColorStop(1, this.color.bidOrder);
+                    this.overlay.context.fillStyle = grad;
+                    this.overlay.context.globalAlpha = (chart._bars[0][BarColumn.BuyVolume] - chart._bars[0][BarColumn.SellVolume]) / chart._bars[0][BarColumn.Volume];
+                    this.overlay.context.fillRect(chartW - 1, chartH - 1, -4, -(chartH - ltpp - 2));
+                }
 
-                    this.overlay.context.restore();
+                this.overlay.context.restore();
 
-                    if (this.cursorX > -1) {
-                        this._drawDepthIndicator(
-                            this.overlay.context,
-                            chartW - chartM - 7,
-                            40,
-                            `Sell Vol. ${new Decimal(chart._bars[0][BarColumn.SellVolume]).toFixed(1)}`,
-                            this.color.askOrder
-                        );
-                        this._drawDepthIndicator(
-                            this.overlay.context,
-                            chartW - chartM - 7,
-                            chartH - 40,
-                            `Buy Vol. ${new Decimal(chart._bars[0][BarColumn.BuyVolume]).toFixed(1)}`,
-                            this.color.bidOrder
-                        );
-                    }
+                if (this.cursorX > -1) {
+                    this._drawDepthIndicator(
+                        this.overlay.context,
+                        chartW - chartM - 7,
+                        40,
+                        `Sell Vol. ${new Decimal(chart._bars[0][BarColumn.SellVolume]).toFixed(1)}`,
+                        this.color.askOrder
+                    );
+                    this._drawDepthIndicator(
+                        this.overlay.context,
+                        chartW - chartM - 7,
+                        chartH - 40,
+                        `Buy Vol. ${new Decimal(chart._bars[0][BarColumn.BuyVolume]).toFixed(1)}`,
+                        this.color.bidOrder
+                    );
                 }
 
                 // Last Depth Indicator (v2.25)
@@ -1456,6 +1454,8 @@ export class Kuromaty {
                     tick[TickColumn.Volume],
                     tick[TickColumn.AskDepth],
                     tick[TickColumn.BidDepth],
+                    tick[TickColumn.SellVolume],
+                    tick[TickColumn.BuyVolume]
                 ];
             });
         }
