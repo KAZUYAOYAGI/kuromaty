@@ -962,7 +962,7 @@ export class Kuromaty {
 
                 this.overlay.context.restore();
 
-                if (this.cursorX > -1) {
+                if (this.cursorX > -1 && chart._bars[0].length > BarColumn.BuyVolume) {
                     this._drawDepthIndicator(
                         this.overlay.context,
                         chartW - chartM - 7,
