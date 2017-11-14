@@ -178,7 +178,7 @@
     kuromaty.overlays = {
         EMA1: new Kuromaty.overlays.EMA({ period: 10, colorKey: "lineMA1" }),
         EMA2: new Kuromaty.overlays.EMA({ period: 21, colorKey: "lineMA2" }),
-        EMA3: new Kuromaty.overlays.EMA({ period: 100, colorKey: "lineMA3" }),
+        EMA3: new Kuromaty.overlays.EMA({ period: 100, backCount: 100, colorKey: "lineMA3" }),
         BollingerBand: new Kuromaty.overlays.BollingerBand(),
         ParabolicSAR: new Kuromaty.overlays.ParabolicSAR()
     };
