@@ -84,7 +84,7 @@ export class ParabolicSAR implements Overlay {
                 }
             }
 
-            sar = sar + af * (ep - sar);
+            sar = sar * (1 - af) + af * ep;
             if (isUpTrend) {
                 if (sar > bar[BarColumn.Low] || sar > prevBar[BarColumn.Low]) {
                     sar = Math.min(bar[BarColumn.Low], prevBar[BarColumn.Low]);
