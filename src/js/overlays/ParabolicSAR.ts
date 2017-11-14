@@ -66,10 +66,10 @@ export class ParabolicSAR implements Overlay {
             }
 
             if (i < barCount) {
+                x += barW;
                 ctx.beginPath();
                 ctx.arc(x, (chart.highest - sar) * chart.ratio, 1, 0, 2 * Math.PI);
                 ctx.fill();
-                x += barW;
             }
 
             if (prevIsUpTrend === isUpTrend) {
