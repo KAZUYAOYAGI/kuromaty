@@ -7,6 +7,7 @@ export class EMA implements Overlay {
 
     public options = {
         period: 20,
+        backCount: 40,
         colorKey: "lineMA1"
     };
 
@@ -55,13 +56,13 @@ export class EMA implements Overlay {
         const ema: number[] = [];
         const period = this.options.period;
         const bars = chart._bars;
-        const maxIndex = Math.min(bars.length - period, barCount);
+        const maxIndex = Math.min(bars.length - period, barCount + this.options.backCount);
 
         if (bars.length < period) {
             return [];
         }
 
-        let avg;
+        let mean;
 
         {
             // 初期値を計算
@@ -69,13 +70,15 @@ export class EMA implements Overlay {
             for (let i = 0; i < period; i++) {
                 sum += bars[maxIndex + i][BarColumn.Close];
             }
-            avg = sum / period;
+            mean = sum / period;
         }
-        ema.unshift(avg);
+        ema.unshift(mean);
 
+        const weight = 2 / (period + 1);
+        const weight2 = 1 - weight;
         for (let i = maxIndex - 1; i >= 0; i--) {
-            avg = avg + 2 * (bars[i][BarColumn.Close] - avg) / (period + 1);
-            ema.unshift(avg)
+            mean = weight * bars[i][BarColumn.Close] + weight2 * mean;
+            ema.unshift(mean);
         }
 
         return ema;
@@ -84,6 +87,7 @@ export class EMA implements Overlay {
 
 export interface Config {
     period: number;
+    backCount: number;
     colorKey: string;
 }
 

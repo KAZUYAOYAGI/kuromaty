@@ -72,17 +72,25 @@ export class BollingerBand implements Overlay {
                 break;
             }
 
-            let sum = 0, sqSum = 0;
+            let sum = 0;
             for (let j = 0; j < periodLength; j++) {
                 const price = chart._bars[i + j][BarColumn.Close];
                 sum += price;
-                sqSum += price * price;
             }
 
-            const avg = sum / periodLength;
+            const mean = sum / periodLength;
+
+            let variance = 0;
+            for (let j = 0; j < periodLength; j++) {
+                const diff = chart._bars[i + j][BarColumn.Close] - mean;
+                variance += diff * diff;
+            }
+
+            variance /= periodLength - 1;
+
             band.push({
-                average: avg,
-                sigma: Math.sqrt((sqSum / periodLength) - (avg * avg))
+                average: mean,
+                sigma: Math.sqrt(variance)
             });
         }
 
