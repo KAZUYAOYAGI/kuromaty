@@ -1,6 +1,7 @@
 import { BarColumn, ColorOption } from "../kuromaty";
 import { Chart } from "../kuromaty";
 import { ChartDimensions, Overlay } from "../Overlay";
+const assign: typeof Object.assign = Object.assign || require("object.assign");
 
 export class EMA implements Overlay {
     minPeriod: number = 1;
@@ -12,7 +13,7 @@ export class EMA implements Overlay {
     };
 
     constructor(options: Options = {}) {
-        Object.assign(this.options, options);
+        assign(this.options, options);
     }
 
     draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {

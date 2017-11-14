@@ -2,6 +2,7 @@
     Copyright 2017 Kuromatch
 */
 import flagrate from "flagrate/lib/es6/flagrate";
+const assign: typeof Object.assign = Object.assign || require("object.assign");
 
 export function zeroPadding(number: number, length: number): string {
     return (Array(length).join("0") + number).slice(-length);
@@ -53,7 +54,7 @@ export function deepCopy<T>(obj: T): T {
         }
       });
     } else if (typeof obj === "object") {
-      newObj = Object.assign({}, obj);
+      newObj = assign({}, obj);
       Object.keys(newObj).forEach((key) => {
         if (
             (typeof newObj[key] === "object" && newObj[key] !== {}) ||

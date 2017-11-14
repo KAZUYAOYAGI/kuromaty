@@ -38,6 +38,7 @@
     "less-plugin-autoprefix": "^1.5.1",
     "local-web-server": "^2.2.4",
     "merge2": "^1.1.0",
+    "object.assign": "^4.0.4",
     "typescript": "^2.6.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
