@@ -80,7 +80,7 @@ export class ParabolicSAR implements Overlay {
                     ep = Math.min(bar[BarColumn.Low], prevEp);
                 }
 
-                if (prevEp != ep) {
+                if (prevEp !== ep) {
                     af = Math.min(af + afStep, maxAf);
                 }
             }

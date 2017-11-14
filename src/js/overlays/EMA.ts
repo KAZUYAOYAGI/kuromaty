@@ -53,7 +53,7 @@ export class EMA implements Overlay {
     }
 
     private calculateEMA(chart: Chart, barCount) {
-        
+
         const ema: number[] = [];
         const period = this.options.period;
         const bars = chart._bars;

@@ -23,10 +23,10 @@ export class SMA implements Overlay {
         const barW = dimensions.barMargin + dimensions.barWidth;
         const barCount = dimensions.barCount;
 
-        SMA._drawSMA(ctx, barX, barW, chart, barCount, options.period, color[options.colorKey]);
+        this._drawSMA(ctx, barX, barW, chart, barCount, options.period, color[options.colorKey]);
     }
 
-    private static _drawSMA(ctx: CanvasRenderingContext2D,
+    private _drawSMA(ctx: CanvasRenderingContext2D,
         x: number, barW: number, chart: Chart, count: number, periodLength: number, color: string) {
 
         x = x + barW;
@@ -40,10 +40,10 @@ export class SMA implements Overlay {
         ctx.setLineDash([]);
         ctx.beginPath();
 
-        let i = 0,
-            j,
-            p = 0,
-            y = 0;
+        let i;
+        let j;
+        let p = 0;
+        let y = 0;
         for (; i < count; i++) {
             if (!chart._bars[i] || !chart._bars[i + periodLength]) {
                 break;

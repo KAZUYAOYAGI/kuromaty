@@ -1,6 +1,3 @@
-/*!
-    Copyright 2017 Kuromatch
-*/
 import flagrate from "flagrate/lib/es6/flagrate";
 const assign: typeof Object.assign = Object.assign || require("object.assign");
 
@@ -66,6 +63,6 @@ export function deepCopy<T>(obj: T): T {
     } else {
       newObj = obj;
     }
-    
+
     return newObj;
 }
