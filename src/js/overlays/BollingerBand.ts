@@ -5,6 +5,10 @@ import { ChartDimensions, Overlay } from "../Overlay";
 export class BollingerBand implements Overlay {
     minPeriod: number = 1;
 
+    get requiredBackCount(): number {
+        return this.options.periodLength - 1;
+    }
+
     public options: Config = {
         periodLength: 20,
         factor: 2,

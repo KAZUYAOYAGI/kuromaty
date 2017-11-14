@@ -611,11 +611,13 @@ export class Kuromaty {
             maxDepth = 0;
             minDepth = Infinity;
 
-            chart._bars = this._getBars(j, chartI, barCount * 2);
+            const requireBarCount = barCount + this.getRequiredBackCount(barCount);
+
+            chart._bars = this._getBars(j, chartI, requireBarCount);
             l = Math.min(barCount, chart._bars.length);
 
             if (chart.selected) {
-                if (barCount > chart._bars.length && this.maxBarCount > chart.bars.length) {
+                if (requireBarCount > chart._bars.length && this.maxBarCount > chart.bars.length) {
                     this.hasDepleted = true;
                 }
             }
@@ -1430,6 +1432,18 @@ export class Kuromaty {
             this._afs--;
             this._hasUpdated = true;
         }
+    }
+
+    private getRequiredBackCount(required = 0) {
+
+        for (const name in this.overlays) {
+            const overlayRequires = this.overlays[name].requiredBackCount;
+            if (overlayRequires > required) {
+                required = overlayRequires;
+            }
+        }
+
+        return required;
     }
 
     private _drawPricePopEffect(chart: Chart, decimal: number, chartW: number, ltpp: number): void {

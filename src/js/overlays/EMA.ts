@@ -5,6 +5,10 @@ import { ChartDimensions, Overlay } from "../Overlay";
 export class EMA implements Overlay {
     minPeriod: number = 1;
 
+    get requiredBackCount(): number {
+        return this.options.backCount;
+    }
+
     public options = {
         period: 20,
         backCount: 40,

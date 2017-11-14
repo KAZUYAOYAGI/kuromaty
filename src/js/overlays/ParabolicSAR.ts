@@ -4,6 +4,9 @@ import { ChartDimensions, Overlay } from "../Overlay";
 
 export class ParabolicSAR implements Overlay {
     minPeriod: number = 1;
+
+    readonly requiredBackCount: number = 1;
+
     public options: Config = {
         afStep: 0.025,
         maxAf: 0.050,
