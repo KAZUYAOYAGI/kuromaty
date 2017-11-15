@@ -1,6 +1,7 @@
 import { BarColumn, ColorOption } from "../kuromaty";
 import { Chart } from "../kuromaty";
 import { ChartDimensions, Overlay } from "../Overlay";
+import assign from "object.assign";
 
 export class BollingerBand implements Overlay {
     minPeriod: number = 1;
@@ -9,14 +10,14 @@ export class BollingerBand implements Overlay {
         return this.options.periodLength - 1;
     }
 
-    public options: Config = {
+    options: Config = {
         periodLength: 20,
         factor: 2,
         colorKey: "grid"
     };
 
     constructor(options: Options = {}) {
-        Object.assign(this.options, options);
+        assign(this.options, options);
     }
 
     draw(chart: Chart, dimensions: ChartDimensions, color: ColorOption) {

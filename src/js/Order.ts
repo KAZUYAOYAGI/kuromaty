@@ -1,8 +1,3 @@
-/*!
-    Copyright 2017 Kuromatch
-*/
-"use strict";
-
 import { Decimal } from "decimal.js-light";
 
 export type Side = "L" | "S" | "L/S";
@@ -34,7 +29,7 @@ export class Order {
     }
 
     merge(order: Order) {
-        
+
         if (!this.price.equals(order.price)) {
             throw new Error("Can not merge different price orders.");
         }
@@ -44,8 +39,7 @@ export class Order {
             throw new Error("Double options is not supported.");
         }
 
-        (<any>this).origSize = this.origSize.plus(order.origSize);
-        (<any>this).size = this.size.plus(order.size);
+        (<any> this).origSize = this.origSize.plus(order.origSize);
+        (<any> this).size = this.size.plus(order.size);
     }
 }
-

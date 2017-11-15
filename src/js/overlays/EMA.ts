@@ -1,6 +1,7 @@
 import { BarColumn, ColorOption } from "../kuromaty";
 import { Chart } from "../kuromaty";
 import { ChartDimensions, Overlay } from "../Overlay";
+import assign from "object.assign";
 
 export class EMA implements Overlay {
     minPeriod: number = 1;
@@ -9,14 +10,14 @@ export class EMA implements Overlay {
         return this.options.backCount;
     }
 
-    public options = {
+    options = {
         period: 20,
         backCount: 40,
         colorKey: "lineMA1"
     };
 
     constructor(options: Options = {}) {
-        Object.assign(this.options, options);
+        assign(this.options, options);
     }
 
     draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {
@@ -56,7 +57,7 @@ export class EMA implements Overlay {
     }
 
     private calculateEMA(chart: Chart, barCount) {
-        
+
         const ema: number[] = [];
         const period = this.options.period;
         const bars = chart._bars;

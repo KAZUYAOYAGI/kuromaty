@@ -3,7 +3,7 @@ import { Chart, ColorOption } from "./kuromaty";
 export interface Overlay {
     minPeriod: number;
     readonly requiredBackCount: number;
-    
+
     /**
      * Draws Overlay.
      *

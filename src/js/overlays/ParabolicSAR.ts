@@ -1,20 +1,21 @@
 import { BarColumn, ColorOption } from "../kuromaty";
 import { Chart } from "../kuromaty";
 import { ChartDimensions, Overlay } from "../Overlay";
+import assign from "object.assign";
 
 export class ParabolicSAR implements Overlay {
     minPeriod: number = 1;
 
     readonly requiredBackCount: number = 1;
 
-    public options: Config = {
+    options: Config = {
         afStep: 0.025,
         maxAf: 0.050,
         colorKey: "textWeak"
     };
 
     constructor(options: Options = {}) {
-        Object.assign(this.options, options);
+        assign(this.options, options);
     }
 
     draw(chart: Chart, dimensions: ChartDimensions, color: ColorOption) {
@@ -82,7 +83,7 @@ export class ParabolicSAR implements Overlay {
                     ep = Math.min(bar[BarColumn.Low], prevEp);
                 }
 
-                if (prevEp != ep) {
+                if (prevEp !== ep) {
                     af = Math.min(af + afStep, maxAf);
                 }
             }
