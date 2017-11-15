@@ -24,6 +24,11 @@ export class Chandelier implements Overlay {
         const barCount = dimensions.barCount;
         const atrs = this.calculateATR(bars, barCount);
         const ctx = chart.context;
+        const maxIndex = atrs.length - period;
+
+        if (maxIndex < 0) {
+            return;
+        }
 
         ctx.save();
 
@@ -40,7 +45,6 @@ export class Chandelier implements Overlay {
         let lowest = Infinity;
         let lowestIndex = Infinity;
 
-        const maxIndex = atrs.length - period;
         let x = barX - maxIndex * barW;
         let periodEnd = maxIndex + period - 1;
         let isUpTrend = bars[periodEnd][BarColumn.Close] >= bars[periodEnd][BarColumn.Open];
