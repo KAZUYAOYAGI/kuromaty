@@ -92,6 +92,16 @@ export class Chandelier implements Overlay {
             }
 
             isNewTrend = prevIsUpTrend !== isUpTrend;
+
+            if (highest <= bar[BarColumn.High]) {
+                highest = bar[BarColumn.High];
+                highestIndex = i;
+            }
+
+            if (lowest >= bar[BarColumn.Low]) {
+                lowest = bar[BarColumn.Low];
+                lowestIndex = i;
+            }
         }
 
         ctx.stroke();
