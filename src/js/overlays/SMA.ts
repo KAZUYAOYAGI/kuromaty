@@ -19,21 +19,15 @@ export class SMA implements Overlay {
         assign(this.options, options);
     }
 
-    draw(chart: Chart, dimensions: ChartDimensions, color: ColorOption) {
+    draw(chart: Chart, dimensions: ChartDimensions, colorOption: ColorOption) {
 
         const options = this.options;
         const ctx = chart.context;
         const barX = dimensions.width - dimensions.rightMargin - 0.5;
         const barW = dimensions.barMargin + dimensions.barWidth;
         const barCount = dimensions.barCount;
-
-        this._drawSMA(ctx, barX, barW, chart, barCount, options.period, color[options.colorKey]);
-    }
-
-    private _drawSMA(ctx: CanvasRenderingContext2D,
-        x: number, barW: number, chart: Chart, count: number, periodLength: number, color: string) {
-
-        x = x + barW;
+        const color = colorOption[options.colorKey];
+        const period = options.period;
 
         ctx.save();
 
@@ -44,21 +38,23 @@ export class SMA implements Overlay {
         ctx.setLineDash([]);
         ctx.beginPath();
 
-        let i;
+        let i = 0;
         let j;
         let p = 0;
         let y = 0;
-        for (; i < count; i++) {
-            if (!chart._bars[i] || !chart._bars[i + periodLength]) {
+        let x = barX + barW;
+
+        for (; i < barCount; i++) {
+            if (!chart._bars[i] || !chart._bars[i + period]) {
                 break;
             }
             x -= barW;
 
             p = 0;
-            for (j = 0; j < periodLength; j++) {
+            for (j = 0; j < period; j++) {
                 p += chart._bars[i + j][BarColumn.Close];
             }
-            p /= periodLength;
+            p /= period;
             y = Math.round((chart.highest - p) * chart.ratio) + 0.5;
 
             if (i === 0) {

@@ -79,8 +79,7 @@ export class BollingerBand implements Overlay {
 
             let sum = 0;
             for (let j = 0; j < periodLength; j++) {
-                const price = chart._bars[i + j][BarColumn.Close];
-                sum += price;
+                sum += chart._bars[i + j][BarColumn.Close];
             }
 
             const mean = sum / periodLength;
