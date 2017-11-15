@@ -1,6 +1,6 @@
 import { ChartDimensions, Overlay } from "../Overlay";
 import { Bar, BarColumn, Chart, ColorOption } from "../kuromaty";
-const assign: typeof Object.assign = Object.assign || require("object.assign");
+import assign from "object.assign";
 
 export class ChandelierExit implements Overlay {
     minPeriod: number = 1;

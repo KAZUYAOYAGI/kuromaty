@@ -1,5 +1,5 @@
 import flagrate from "flagrate/lib/es6/flagrate";
-const assign: typeof Object.assign = Object.assign || require("object.assign");
+import assign from "object.assign";
 
 export function zeroPadding(number: number, length: number): string {
     return (Array(length).join("0") + number).slice(-length);

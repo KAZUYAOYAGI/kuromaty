@@ -1,7 +1,7 @@
 import { BarColumn, ColorOption } from "../kuromaty";
 import { Chart } from "../kuromaty";
 import { ChartDimensions, Overlay } from "../Overlay";
-const assign: typeof Object.assign = Object.assign || require("object.assign");
+import assign from "object.assign";
 
 export class ParabolicSAR implements Overlay {
     minPeriod: number = 1;
