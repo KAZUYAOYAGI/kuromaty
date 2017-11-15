@@ -1,8 +1,3 @@
-/*!
-    Copyright 2017 Kuromatch
-*/
-"use strict";
-
 import { Position, PositionLike } from "./Position";
 import { Decimal } from "decimal.js-light";
 
@@ -15,7 +10,7 @@ export class PositionSet {
         if (positions) {
             positions.forEach(position => {
                 this.add(new Position(position));
-            })
+            });
         }
     }
 

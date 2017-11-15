@@ -1,12 +1,13 @@
 {
   "name": "kuromaty",
-  "version": "1.21.0",
+  "version": "1.21.2",
   "description": "Financial Bar Chart Library for Kuromachart.",
   "homepage": "https://kuromat.ch/",
   "main": "lib/es6/kuromaty.js",
   "scripts": {
     "start": "ws -f tiny --spa test/index.html -r \"/api/* -> https://api.kuromat.ch/api/$1\"",
     "build": "gulp build",
+    "clean": "gulp clean",
     "watch": "gulp watch",
     "prepublishOnly": "gulp build",
     "test": "echo \"Warning: no test specified yet\" && exit 0"
@@ -32,12 +33,15 @@
     "gulp-less": "^3.3.2",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.6.0",
+    "gulp-tslint": "^8.1.2",
     "gulp-typescript": "^3.2.1",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
     "less-plugin-autoprefix": "^1.5.1",
     "local-web-server": "^2.2.4",
     "merge2": "^1.1.0",
+    "object.assign": "^4.0.4",
+    "tslint": "^5.8.0",
     "typescript": "^2.6.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
