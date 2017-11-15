@@ -6,7 +6,7 @@ const assign: typeof Object.assign = Object.assign || require("object.assign");
 export class BollingerBand implements Overlay {
     minPeriod: number = 1;
 
-    public options: Config = {
+    options: Config = {
         periodLength: 20,
         factor: 2,
         colorKey: "grid"

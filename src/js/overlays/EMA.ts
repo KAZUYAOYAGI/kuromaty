@@ -6,7 +6,7 @@ const assign: typeof Object.assign = Object.assign || require("object.assign");
 export class EMA implements Overlay {
     minPeriod: number = 1;
 
-    public options = {
+    options = {
         period: 20,
         backCount: 40,
         colorKey: "lineMA1"

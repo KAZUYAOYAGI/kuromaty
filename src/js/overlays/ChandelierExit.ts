@@ -1,24 +1,24 @@
-"use strict";
-import {ChartDimensions, Overlay} from "../Overlay";
-import {Bar, BarColumn, Chart, ColorOption} from "../kuromaty";
+import { ChartDimensions, Overlay } from "../Overlay";
+import { Bar, BarColumn, Chart, ColorOption } from "../kuromaty";
+const assign: typeof Object.assign = Object.assign || require("object.assign");
 
-export class Chandelier implements Overlay {
+export class ChandelierExit implements Overlay {
     minPeriod: number = 1;
 
-    constructor(options: Options = {}) {
-        Object.assign(this.options, options);
-    }
-
-    public options: Config = {
+    options: Config = {
         period: 23,
         factor: 1,
         backCount: 40,
-        colorKey: "lineMA1"
+        colorKey: "lineMA2"
     };
+
+    constructor(options: Options = {}) {
+        assign(this.options, options);
+    }
 
     draw(chart: Chart, dimensions: ChartDimensions, color: ColorOption) {
         const bars = chart._bars;
-        const {period, factor} = this.options;
+        const { period, factor } = this.options;
         const barX = dimensions.width - dimensions.rightMargin - Math.ceil(dimensions.barWidth / 2) + 0.5 /* hige width */;
         const barW = dimensions.barMargin + dimensions.barWidth;
         const barCount = dimensions.barCount;
@@ -49,13 +49,13 @@ export class Chandelier implements Overlay {
         let periodEnd = maxIndex + period - 1;
         let isUpTrend = bars[periodEnd][BarColumn.Close] >= bars[periodEnd][BarColumn.Open];
         let isNewTrend = true;
-        for(let i = maxIndex; i >= 0; i--, periodEnd--, x += barW) {
+        for (let i = maxIndex; i >= 0; i-- , periodEnd-- , x += barW) {
             const bar = bars[i];
             if (highestIndex > periodEnd) {
                 // update highest
                 highest = bar[BarColumn.High];
                 highestIndex = i;
-                for (let j = i + 1;  j <= periodEnd; j++) {
+                for (let j = i + 1; j <= periodEnd; j++) {
                     if (highest < bars[j][BarColumn.High]) {
                         highest = bars[j][BarColumn.High];
                         highestIndex = j;
@@ -67,7 +67,7 @@ export class Chandelier implements Overlay {
                 // update lowest
                 lowest = bar[BarColumn.Low];
                 lowestIndex = i;
-                for (let j = i + 1;  j <= periodEnd; j++) {
+                for (let j = i + 1; j <= periodEnd; j++) {
                     if (lowest > bars[j][BarColumn.Low]) {
                         lowest = bars[j][BarColumn.Low];
                         lowestIndex = j;
@@ -120,7 +120,7 @@ export class Chandelier implements Overlay {
             return [];
         }
 
-        let atrs: number[] = [];
+        const atrs: number[] = [];
         let atr = 0;
 
         // 初期値を計算
@@ -145,13 +145,13 @@ export class Chandelier implements Overlay {
             const prevBar = bars[i + 1];
             if (prevBar) {
                 return Math.max(
-                    Math.abs(bar[BarColumn.High] - bar[BarColumn.Low] ),
-                    Math.abs(bar[BarColumn.High] - prevBar[BarColumn.Close] ),
-                    Math.abs(bar[BarColumn.Low] - prevBar[BarColumn.Close] )
+                    Math.abs(bar[BarColumn.High] - bar[BarColumn.Low]),
+                    Math.abs(bar[BarColumn.High] - prevBar[BarColumn.Close]),
+                    Math.abs(bar[BarColumn.Low] - prevBar[BarColumn.Close])
                 );
             }
 
-            return Math.abs(bar[BarColumn.High] - bar[BarColumn.Low] );
+            return Math.abs(bar[BarColumn.High] - bar[BarColumn.Low]);
         }
     }
 }
