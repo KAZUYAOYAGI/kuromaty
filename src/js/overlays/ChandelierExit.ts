@@ -5,6 +5,10 @@ import assign from "object.assign";
 export class ChandelierExit implements Overlay {
     minPeriod: number = 1;
 
+    get requiredBackCount() {
+        return Math.max(this.options.backCount, this.options.period);
+    }
+
     options: Config = {
         period: 23,
         factor: 1,
