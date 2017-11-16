@@ -43,6 +43,7 @@ export interface Options {
     chartCount?: number;
     chartTitles?: string[];
     chartOverlay?: boolean;
+    cursorSnapToGrid?: boolean;
     barWidth?: number;
     barMargin?: number;
     decimalPower?: number;
@@ -208,6 +209,10 @@ export class Kuromaty {
         if (options.chartOverlay === undefined) {
             options.chartOverlay = false;
         }
+        if (options.cursorSnapToGrid === undefined) {
+            options.cursorSnapToGrid = true;
+        }
+
         options.barWidth = options.barWidth || 5;
         options.barMargin = options.barMargin || 3;
         options.decimalPower = options.decimalPower || 0;
@@ -591,6 +596,8 @@ export class Kuromaty {
         let barDateMinutes: number;
         let barDateHours: number;
         let barDateDate: number;
+        let lowestGridPrice: number;
+        let gridPriceDelta: number;
 
         this.hasDepleted = false;
 
@@ -882,13 +889,16 @@ export class Kuromaty {
                 // horizontal grid (price)
                 let lp = Infinity;
                 let cp = 0;
-                let add = decimal === 1 ? 1000 : 100 / decimal;
+                gridPriceDelta = decimal === 1 ? 1000 : 100 / decimal;
                 if (period === 0) {
-                    add /= 100;
+                    gridPriceDelta /= 100;
                 }
-                for (i = chart.lowest - chart.lowest % add; i < chart.highest; i += add) {
+
+                gridPriceDelta *= Math.ceil(80 / (gridPriceDelta * chart.ratio));
+                lowestGridPrice = this.calculateHorizontalGridLowestPrice(chart, gridPriceDelta);
+                for (i = lowestGridPrice; i < chart.highest; i += gridPriceDelta) {
                     cp = Math.round((chart.highest - i) * chart.ratio);
-                    if (lp - cp < 80 || cp + 30 > chartH) {
+                    if (cp + 30 > chartH) {
                         continue;
                     }
 
@@ -1210,11 +1220,22 @@ export class Kuromaty {
             );
 
             const chart = this.charts[0];
-            this.cursorPrice = Math.ceil((chart.highest - this.cursorY / chart.ratio) * decimal) / decimal;
-            if (decimal === 1) {
-                this.cursorPrice = Math.round(this.cursorPrice / 50) * 50;
-            } else {
-                this.cursorPrice = Math.round(this.cursorPrice * (decimal / 10)) / (decimal / 10);
+
+            if (this.options.cursorSnapToGrid) {
+                const nearestGridPrice = lowestGridPrice + Math.floor((chart.highest - this.cursorY / chart.ratio - lowestGridPrice) / gridPriceDelta) * gridPriceDelta;
+                const nearestGridY = Math.floor((chart.highest - nearestGridPrice) * chart.ratio);
+                if (nearestGridY === Math.floor(this.cursorY) || nearestGridY === Math.ceil(this.cursorY)) {
+                    this.cursorPrice = nearestGridPrice;
+                }
+            }
+
+            if (this.cursorPrice === 0) {
+                this.cursorPrice = Math.ceil((chart.highest - this.cursorY / chart.ratio) * decimal) / decimal;
+                if (decimal === 1) {
+                    this.cursorPrice = Math.round(this.cursorPrice / 50) * 50;
+                } else {
+                    this.cursorPrice = Math.round(this.cursorPrice * (decimal / 10)) / (decimal / 10);
+                }
             }
             const cursorPriceY = Math.round((chart.highest - this.cursorPrice) * chart.ratio);
 
@@ -2121,6 +2142,57 @@ export class Kuromaty {
         );
 
         ctx.restore();
+    }
+
+    private calculateHorizontalGridLowestPrice(chart, delta) {
+        const m = findNiceValue(chart.highest, chart.lowest);
+
+        return m - Math.ceil((m - chart.lowest) / delta) * delta;
+
+        function findNiceValue(high, low) {
+            const highStr = Math.floor(high).toString(10);
+            const lowStr = Math.floor(low).toString(10);
+
+            if (low < 0 || highStr.length !== lowStr.length) {
+                const h = Number(highStr.charAt(0));
+                let x;
+                if (h >= 5) {
+                    x = 5;
+                } else if (h >= 2) {
+                    x = 2;
+                } else {
+                    x = 1;
+                }
+
+                return x * Math.pow(10, highStr.length - 1);
+            }
+
+            const length = highStr.length;
+            for (let i = 0; i < length; i++) {
+                if (highStr.charAt(i) !== lowStr.charAt(i)) {
+                    const topDigit = Number(highStr.substring(0, i - 1)) * 10;
+                    const h = Number(highStr.charAt(i));
+                    const l = Number(highStr.charAt(i));
+
+                    let x;
+                    if (l === 0) {
+                        x = 0;
+                    } else if (h >= 5 && l <= 5) {
+                        x = 5;
+                    } else if (l % 2 === 0) {
+                        x = l;
+                    } else if (h % 2 === 0) {
+                        x = h;
+                    } else {
+                        x = Math.floor((h + l) / 2);
+                    }
+
+                    return (topDigit + x) * Math.pow(10, length - i - 1);
+                }
+            }
+
+            return low;
+        }
     }
 }
 
