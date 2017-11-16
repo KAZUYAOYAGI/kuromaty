@@ -12,6 +12,21 @@ import { Decimal } from "decimal.js-light";
 import { ChartDimensions, Overlay } from "./Overlay";
 import * as overlays from "./overlays/";
 
+enum Month {
+    Jan,
+    Feb,
+    Mar,
+    Apr,
+    May,
+    Jun,
+    Jul,
+    Aug,
+    Sep,
+    Oct,
+    Nov,
+    Dec
+}
+
 /** time, open, high, low, close, volume, askDepth, bidDepth, sellVolume, buyVolume */
 export type Bar = [number, number, number, number, number, number, number, number, number, number];
 export const enum BarColumn {
@@ -596,6 +611,7 @@ export class Kuromaty {
         let barDateMinutes: number;
         let barDateHours: number;
         let barDateDate: number;
+        let barDateMonth: number;
         let lowestGridPrice: number;
         let gridPriceDelta: number;
 
@@ -837,6 +853,7 @@ export class Kuromaty {
                 barDateMinutes = barDate.getMinutes();
                 barDateHours = barDate.getHours();
                 barDateDate = barDate.getDate();
+                barDateMonth = barDate.getMonth();
 
                 // datetime
                 if (
@@ -849,9 +866,9 @@ export class Kuromaty {
                     (period >= 30 && period < 60 && barDateMinutes % 60 === 0 && barDateHours % 6 === 0) ||
                     (period >= 60 && period < 120 && barDateMinutes % 60 === 0 && barDateHours % 12 === 0) ||
                     (period >= 120 && period < 240 && barDateHours === 0) ||
-                    (period >= 240 && period < 360 && barDateHours === 0 && barDateDate % 2 === 0) ||
-                    (period >= 360 && period < 720 && barDateHours === 0 && barDateDate % 3 === 0) ||
-                    (period >= 720 && barDateHours === 0 && barDateDate % 7 === 0)
+                    (period >= 240 && period < 360 && barDateHours === 0 && barDateDate % 2 === 1) ||
+                    (period >= 360 && period < 720 && barDateHours === 0 && barDateDate % 3 === 1) ||
+                    (period >= 720 && barDateHours === 0 && barDateDate % 7 === 1)
                 ) {
                     // vertical grid
                     this.grid.context.fillStyle = this.color.grid;
@@ -864,18 +881,27 @@ export class Kuromaty {
 
                     // time
                     let timeStr;
-                    if (barDateHours === 0 && barDateMinutes === 0) {
-                        timeStr = `${barDate.getMonth() + 1}/${barDateDate}'`;
-                    } else {
+                    if (!(barDateHours === 0 && barDateMinutes === 0)) {
                         timeStr = `${barDateHours}:${util.zeroPadding(barDateMinutes, 2)}`;
+                    } else if (period >= 1440 && barDateDate > 22) {
+                        timeStr = null;
+                    } else if (barDateDate !== 1) {
+                        timeStr = period >= 1440 ? barDateDate : `${barDateMonth + 1}/${barDateDate}'`;
+                    } else if (barDateMonth !== 0) {
+                        timeStr = Month[barDateMonth];
+                    } else {
+                        timeStr = barDate.getFullYear();
                     }
-                    this.grid.context.fillStyle = this.color.text;
-                    this.grid.context.font = "10px sans-serif";
-                    this.grid.context.fillText(
-                        timeStr,
-                        barX - Math.ceil(this.options.barWidth / 2),
-                        canvasH - 4
-                    );
+
+                    if (timeStr !== null) {
+                        this.grid.context.fillStyle = this.color.text;
+                        this.grid.context.font = "10px sans-serif";
+                        this.grid.context.fillText(
+                            timeStr,
+                            barX - Math.ceil(this.options.barWidth / 2),
+                            canvasH - 4
+                        );
+                    }
                 }
             }// bars
 
