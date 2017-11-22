@@ -1634,10 +1634,12 @@ export class Kuromaty {
             backCount = start * period + (date.getMinutes() % period) - period;
         }
 
+        // something wrong
         let i = Math.min(
             (barCount * period) + backCount - 1,
             mBars.length - 1
         ) - (bars.length * (period / 60));
+        i = Math.max(1, i); // workaround
         for (; i >= backCount; i--) {
             if (bars.length !== 0 && bars[0][BarColumn.Time] > mBars[i][BarColumn.Time]) {
                 continue;
