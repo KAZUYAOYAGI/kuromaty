@@ -42,6 +42,8 @@ export const enum BarColumn {
     BuyVolume
 }
 
+export type Bars = Bar[] & { nextTick?: number; period?: number; };
+
 /** time, ltp, volume, askDepth, bidDepth, sellVolume, buyVolume */
 export type Tick = [number, number, number, number, number, number, number];
 const enum TickColumn {
@@ -52,6 +54,13 @@ const enum TickColumn {
     BidDepth,
     SellVolume,
     BuyVolume
+}
+
+const enum TimeByMinutes {
+    OneMinute = 1,
+    OneHour =  60,
+    OneDay = 60 * 24,
+    OneWeek = 60 * 24 * 7
 }
 
 export interface Options {
@@ -113,7 +122,7 @@ export interface Chart {
     context: CanvasRenderingContext2D;
     bars: Bar[];
     hBars: Bar[];
-    _bars: Bar[];
+    _bars: Bars;
     ticks: Tick[];
     board: Board;
     boardMaxSize: number;
@@ -210,6 +219,8 @@ export class Kuromaty {
     private _positions: PositionSet = new PositionSet();
     private _orders: OrderSet = new OrderSet();
     private _contextMenu: ContextMenu;
+
+    private _barsDownSampleCache: Bars[] = [];
 
     private __keydownHandler = this._keydownHandler.bind(this);
 
@@ -1541,7 +1552,7 @@ export class Kuromaty {
         this.overlay.context.restore();
     }
 
-    private _getBars(index: number, start: number, barCount: number): Bar[] {
+    private _getBars(index: number, start: number, barCount: number): Bars {
 
         const chart = this.charts[index];
         const period = this.timePeriod;
@@ -1549,7 +1560,8 @@ export class Kuromaty {
         if (chart.bars.length === 0) {
             return [];
         }
-        if (period === 1) {
+
+        if (period === TimeByMinutes.OneMinute) {
             return chart.bars.slice(start, start + barCount);
         } else if (period === 0) {
             return chart.ticks.slice(start, start + barCount).map(tick => {
@@ -1568,121 +1580,136 @@ export class Kuromaty {
             });
         }
 
-        const bars: Bar[] = [];
-        let date;
-        let backCount = 0;
+        const timeZoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
+        const latestTime = truncateTime(period, chart.bars[0][BarColumn.Time]) - period * start * 60 * 1000;
+        const oldestTime = latestTime - (barCount - 1) * period * 60 * 1000;
 
-        // use hBars (experimental)
-        if (period === 60) {
-            bars.push.apply(bars, util.deepCopy(chart.hBars.slice(start, start + barCount)));
-        } else if (period > 60) {
-            const hBars = chart.hBars;
+        const barsFromHBars: Bars = downSample(
+            chart.hBars.slice(1),
+            TimeByMinutes.OneHour,
+            period,
+            oldestTime,
+            latestTime + (period - TimeByMinutes.OneHour) * 60 * 1000
+        );
 
-            if (start !== 0) {
-                date = new Date(hBars[0][BarColumn.Time]);
-                backCount = start * (period / 60) + (date.getHours() % (period / 60)) - (period / 60);
+        const mBarsSamplingStartTime = barsFromHBars.length > 0 ?
+            barsFromHBars.nextTick :
+            oldestTime;
+
+        const barsFromMBars: Bars = downSample(
+            chart.bars,
+            1,
+            period,
+            mBarsSamplingStartTime,
+            latestTime + (period - 1) * 60 * 1000
+        );
+
+        return this._barsDownSampleCache[index] = mergeBars(mergeBars([], barsFromHBars), barsFromMBars);
+
+        function mergeBars(bars1: Bars, bars2: Bars): Bars {
+            if (bars1.length < 1) {
+                return bars2;
             }
 
-            let i = Math.min(
-                (barCount * (period / 60)) + backCount - 1,
-                hBars.length - 1
-            );
-            for (; i >= backCount; i--) {
-                date = new Date(hBars[i][BarColumn.Time]);
+            if (bars2.length < 1) {
+                return bars1;
+            }
 
+            const bar1: Bar = bars1[0];
+            const bar2: Bar = bars2[bars2.length - 1];
+
+            if (bar1[BarColumn.Time] === bar2[BarColumn.Time]) {
+                mergeBar(bar1, bar2);
+                bars2.pop();
+            }
+
+            const ret: Bars = bars2.concat(bars1);
+            ret.nextTick = bars2.nextTick;
+            ret.period = bars2.period;
+
+            return ret;
+        }
+
+        function truncateTime(period: number, time: number) {
+            const periodByMilliSec = period * 60 * 1000;
+            return Math.floor((time - timeZoneOffset) / periodByMilliSec) * periodByMilliSec + timeZoneOffset;
+        }
+
+        function mergeBar(bar1: Bar, bar2: Bar) {
+            if (bar1[BarColumn.High] < bar2[BarColumn.High]) {
+                bar1[BarColumn.High] = bar2[BarColumn.High];
+            }
+            if (bar1[BarColumn.Low] > bar2[BarColumn.Low]) {
+                bar1[BarColumn.Low] = bar2[BarColumn.Low];
+            }
+            bar1[BarColumn.Close] = bar2[BarColumn.Close];
+            bar1[BarColumn.Volume] += bar2[BarColumn.Volume];
+            bar1[BarColumn.AskDepth] = bar2[BarColumn.AskDepth] || 0;
+            bar1[BarColumn.BidDepth] = bar2[BarColumn.BidDepth] || 0;
+            bar1[BarColumn.SellVolume] += bar2[BarColumn.SellVolume] || 0;
+            bar1[BarColumn.BuyVolume] += bar2[BarColumn.BuyVolume] || 0;
+        }
+
+        function downSample(fromBars: Bars, fromPeriod: number, period: number, oldestTime: number, latestTime: number): Bars {
+            if (fromBars.length < 1 || fromPeriod > period || oldestTime > latestTime) {
+                return [];
+            }
+
+            const end = Math.max(0, timeToIndex(fromBars, fromPeriod, latestTime));
+            const start = timeToIndex(fromBars, fromPeriod, oldestTime);
+
+            if (fromPeriod === period) {
+                const bars: Bars = fromBars.slice(end, start).map(util.deepCopy);
+                bars.nextTick = fromBars[end][BarColumn.Time] + fromPeriod * 60 * 1000;
+                bars.period = period;
+
+                return bars;
+            }
+
+            const bars: Bars = [];
+            let i;
+            for (i = Math.min(start, fromBars.length - 1); i >= end; i--) {
+                const fromBar = fromBars[i];
+                const date = new Date(fromBar[BarColumn.Time]);
+
+                const bar = bars[0];
                 if (
                     bars.length === 0 ||
                     (
+                        date.getMinutes() % period === 0 &&
                         date.getHours() % Math.ceil(period / 60) === 0 &&
-                        bars[0][BarColumn.Time] < hBars[i][BarColumn.Time]
+                        bar[BarColumn.Time] < fromBar[BarColumn.Time]
                     )
                 ) {
                     bars.unshift([
-                        date.getTime(),
-                        hBars[i][BarColumn.Open],
-                        hBars[i][BarColumn.High],
-                        hBars[i][BarColumn.Low],
-                        hBars[i][BarColumn.Close],
-                        hBars[i][BarColumn.Volume],
-                        hBars[i][BarColumn.AskDepth] || 0,
-                        hBars[i][BarColumn.BidDepth] || 0,
-                        hBars[i][BarColumn.SellVolume] || 0,
-                        hBars[i][BarColumn.BuyVolume] || 0
+                        truncateTime(period, fromBar[BarColumn.Time]),
+                        fromBar[BarColumn.Open],
+                        fromBar[BarColumn.High],
+                        fromBar[BarColumn.Low],
+                        fromBar[BarColumn.Close],
+                        fromBar[BarColumn.Volume],
+                        fromBar[BarColumn.AskDepth] || 0,
+                        fromBar[BarColumn.BidDepth] || 0,
+                        fromBar[BarColumn.SellVolume] || 0,
+                        fromBar[BarColumn.BuyVolume] || 0
                     ]);
                     continue;
                 }
-
-                if (bars[0][BarColumn.High] < hBars[i][BarColumn.High]) {
-                    bars[0][BarColumn.High] = hBars[i][BarColumn.High];
-                }
-                if (bars[0][BarColumn.Low] > hBars[i][BarColumn.Low]) {
-                    bars[0][BarColumn.Low] = hBars[i][BarColumn.Low];
-                }
-                bars[0][BarColumn.Close] = hBars[i][BarColumn.Close];
-                bars[0][BarColumn.Volume] += hBars[i][BarColumn.Volume];
-                bars[0][BarColumn.AskDepth] = hBars[i][BarColumn.AskDepth] || 0;
-                bars[0][BarColumn.BidDepth] = hBars[i][BarColumn.BidDepth] || 0;
-                bars[0][BarColumn.SellVolume] += hBars[i][BarColumn.SellVolume] || 0;
-                bars[0][BarColumn.BuyVolume] += hBars[i][BarColumn.BuyVolume] || 0;
+                mergeBar(bar, fromBar);
             }
+
+            bars.nextTick = fromBars[end][BarColumn.Time] + fromPeriod * 60 * 1000;
+            bars.period = period;
+            return bars;
         }
 
-        const mBars = chart.bars;
-
-        if (start !== 0) {
-            date = new Date(mBars[0][BarColumn.Time]);
-            backCount = start * period + (date.getMinutes() % period) - period;
+        function timeToIndex(bars: Bar[], period: number, time: number) {
+            if (bars.length < 1) {
+                return NaN;
+            }
+            const periodByMilliSec = period * 60 * 1000;
+            return Math.floor(bars[0][BarColumn.Time] / periodByMilliSec) - Math.floor((time / periodByMilliSec));
         }
-
-        let i = Math.min(
-            ((barCount - bars.length + 2) * period) + backCount - 1,
-            mBars.length - 1
-        );
-        for (; i >= backCount; i--) {
-            if (bars.length !== 0 && bars[0][BarColumn.Time] > mBars[i][BarColumn.Time]) {
-                continue;
-            }
-
-            date = new Date(mBars[i][BarColumn.Time]);
-
-            if (
-                bars.length === 0 ||
-                (
-                    date.getMinutes() % period === 0 &&
-                    date.getHours() % Math.ceil(period / 60) === 0 &&
-                    bars[0][BarColumn.Time] < mBars[i][BarColumn.Time]
-                )
-            ) {
-                bars.unshift([
-                    date.setSeconds(0, 0),
-                    mBars[i][BarColumn.Open],
-                    mBars[i][BarColumn.High],
-                    mBars[i][BarColumn.Low],
-                    mBars[i][BarColumn.Close],
-                    mBars[i][BarColumn.Volume],
-                    mBars[i][BarColumn.AskDepth] || 0,
-                    mBars[i][BarColumn.BidDepth] || 0,
-                    mBars[i][BarColumn.SellVolume] || 0,
-                    mBars[i][BarColumn.BuyVolume] || 0
-                ]);
-                continue;
-            }
-
-            if (bars[0][BarColumn.High] < mBars[i][BarColumn.High]) {
-                bars[0][BarColumn.High] = mBars[i][BarColumn.High];
-            }
-            if (bars[0][BarColumn.Low] > mBars[i][BarColumn.Low]) {
-                bars[0][BarColumn.Low] = mBars[i][BarColumn.Low];
-            }
-            bars[0][BarColumn.Close] = mBars[i][BarColumn.Close];
-            bars[0][BarColumn.Volume] += mBars[i][BarColumn.Volume];
-            bars[0][BarColumn.AskDepth] = mBars[i][BarColumn.AskDepth] || 0;
-            bars[0][BarColumn.BidDepth] = mBars[i][BarColumn.BidDepth] || 0;
-            bars[0][BarColumn.SellVolume] += mBars[i][BarColumn.SellVolume] || 0;
-            bars[0][BarColumn.BuyVolume] += mBars[i][BarColumn.BuyVolume] || 0;
-        }
-
-        return bars.slice(0, barCount);
     }
 
     private _keydownHandler(ev: KeyboardEvent) {
