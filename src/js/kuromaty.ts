@@ -1953,11 +1953,12 @@ export class Kuromaty {
                 this._dragStartI = this.barIndex;
             }
             const deltaX = this._dragStartX - offsetX;
+            const maxIndex = this._getMaxIndex();
             this.barIndex = this._dragStartI - Math.round(deltaX / (this.options.barWidth + this.options.barMargin));
             if (this.barIndex < 0) {
                 this.barIndex = 0;
-            } else if (this.barIndex >= this.charts[0].bars.length) {
-                this.barIndex = this.charts[0].bars.length - 1;
+            } else if (this.barIndex > maxIndex) {
+                this.barIndex = maxIndex;
             }
         } else {
             this._dragStartX = undefined;
@@ -1983,8 +1984,11 @@ export class Kuromaty {
         }
 
         this.barIndex -= Math.round(ev.deltaX ? ev.deltaX : -(ev.deltaY / 6));
+        const maxIndex = this._getMaxIndex();
         if (this.barIndex < 0) {
             this.barIndex = 0;
+        } else if (this.barIndex > maxIndex) {
+            this.barIndex = maxIndex;
         }
 
         this._hasUpdated = true;
@@ -2222,6 +2226,18 @@ export class Kuromaty {
         );
 
         ctx.restore();
+    }
+
+    private _getMaxIndex() {
+        if (this.timePeriod > TimeByMinutes.OneHour) {
+            return Math.floor(this.charts[0].hBars.length * (TimeByMinutes.OneHour / this.timePeriod));
+        } else if (this.timePeriod === TimeByMinutes.OneHour) {
+            return this.charts[0].hBars.length - 1;
+        } else if (this.timePeriod === TimeByMinutes.OneMinute) {
+            return this.charts[0].bars.length - 1;
+        } else {
+            return Math.floor(this.charts[0].bars.length / this.timePeriod);
+        }
     }
 
     private calculateHorizontalGridLowestPrice(chart, delta) {
