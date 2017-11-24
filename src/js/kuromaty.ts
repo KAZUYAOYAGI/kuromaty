@@ -634,7 +634,7 @@ export class Kuromaty {
 
             chart.context.clearRect(0, 0, canvasW, canvasH);
 
-            if (!chart.selected) {
+            if (period === 0 && !chart.selected) {
                 continue;
             }
 
@@ -644,7 +644,7 @@ export class Kuromaty {
             maxDepth = 0;
             minDepth = Infinity;
 
-            const requireBarCount = barCount + this.getRequiredBackCount(barCount);
+            const requireBarCount = barCount + (chart.selected ? this.getRequiredBackCount(barCount) : barCount);
 
             chart._bars = this._getBars(j, chartI, requireBarCount);
             l = Math.min(barCount, chart._bars.length);
@@ -724,7 +724,7 @@ export class Kuromaty {
             const ctx = chart.context;
             let barX = chartW - chartM;
 
-            if (!chart.selected) {
+            if (period === 0 && !chart.selected) {
                 continue;
             }
 
