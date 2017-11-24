@@ -42,7 +42,7 @@ export const enum BarColumn {
     BuyVolume
 }
 
-export type Bars = Bar[] & { nextTick?: number; period?: number; };
+export interface Bars extends Array<Bar> { nextTick?: number; period?: number; }
 
 /** time, ltp, volume, askDepth, bidDepth, sellVolume, buyVolume */
 export type Tick = [number, number, number, number, number, number, number];
@@ -650,7 +650,7 @@ export class Kuromaty {
             l = Math.min(barCount, chart._bars.length);
 
             if (chart.selected) {
-                if (requireBarCount > chart._bars.length && this.maxBarCount > chart.bars.length) {
+                if (requireBarCount > chart._bars.length && this.maxBarCount > (period > TimeByMinutes.OneHour ? chart.hBars.length : chart.bars.length)) {
                     this.hasDepleted = true;
                 }
             }
@@ -1584,27 +1584,41 @@ export class Kuromaty {
         const latestTime = truncateTime(period, chart.bars[0][BarColumn.Time]) - period * start * 60 * 1000;
         const oldestTime = latestTime - (barCount - 1) * period * 60 * 1000;
 
+        const cached: Bars = normalizeCache(this._barsDownSampleCache[index]);
+
         const barsFromHBars: Bars = downSample(
             chart.hBars.slice(1),
             TimeByMinutes.OneHour,
             period,
-            oldestTime,
+            cached.nextTick,
             latestTime + (period - TimeByMinutes.OneHour) * 60 * 1000
         );
-
-        const mBarsSamplingStartTime = barsFromHBars.length > 0 ?
-            barsFromHBars.nextTick :
-            oldestTime;
 
         const barsFromMBars: Bars = downSample(
             chart.bars,
             1,
             period,
-            mBarsSamplingStartTime,
+            barsFromHBars.nextTick,
             latestTime + (period - 1) * 60 * 1000
         );
 
-        return this._barsDownSampleCache[index] = mergeBars(mergeBars([], barsFromHBars), barsFromMBars);
+        return this._barsDownSampleCache[index] = mergeBars(mergeBars(cached, barsFromHBars), barsFromMBars);
+
+        function createBars(nextTick, period) {
+            const ret: Bars = [];
+            ret.period = period;
+            ret.nextTick = nextTick;
+
+            return ret;
+        }
+
+        function  normalizeCache(cache: Bars) {
+            if (cache === undefined || cache.length === 0 || cache[cache.length - 1][BarColumn.Time] > oldestTime) {
+                return createBars(oldestTime, period);
+            }
+
+            return downSample(cache.slice(1), cache.period, period, oldestTime, latestTime);
+        }
 
         function mergeBars(bars1: Bars, bars2: Bars): Bars {
             if (bars1.length < 1) {
@@ -1652,11 +1666,15 @@ export class Kuromaty {
 
         function downSample(fromBars: Bars, fromPeriod: number, period: number, oldestTime: number, latestTime: number): Bars {
             if (fromBars.length < 1 || fromPeriod > period || oldestTime > latestTime) {
-                return [];
+                return createBars(oldestTime, period);
             }
 
             const end = Math.max(0, timeToIndex(fromBars, fromPeriod, latestTime));
             const start = timeToIndex(fromBars, fromPeriod, oldestTime);
+
+            if (end >= fromBars.length) {
+                return createBars(oldestTime, period);
+            }
 
             if (fromPeriod === period) {
                 const bars: Bars = fromBars.slice(end, start).map(util.deepCopy);
@@ -1668,20 +1686,11 @@ export class Kuromaty {
 
             const bars: Bars = [];
             let i;
+            let bar: Bar = void 0;
             for (i = Math.min(start, fromBars.length - 1); i >= end; i--) {
                 const fromBar = fromBars[i];
-                const date = new Date(fromBar[BarColumn.Time]);
-
-                const bar = bars[0];
-                if (
-                    bars.length === 0 ||
-                    (
-                        date.getMinutes() % period === 0 &&
-                        date.getHours() % Math.ceil(period / 60) === 0 &&
-                        bar[BarColumn.Time] < fromBar[BarColumn.Time]
-                    )
-                ) {
-                    bars.unshift([
+                if ( bar === undefined || bar[BarColumn.Time] < truncateTime(period, fromBar[BarColumn.Time]) ) {
+                    bars.unshift(bar = [
                         truncateTime(period, fromBar[BarColumn.Time]),
                         fromBar[BarColumn.Open],
                         fromBar[BarColumn.High],
