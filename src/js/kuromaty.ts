@@ -1584,7 +1584,7 @@ export class Kuromaty {
         const latestTime = truncateTime(period, chart.bars[0][BarColumn.Time]) - period * start * 60 * 1000;
         const oldestTime = latestTime - (barCount - 1) * period * 60 * 1000;
 
-        const cached: Bars = normalizeCache(this._barsDownSampleCache[index]);
+        const cached: Bars = normalizeCache(this._barsDownSampleCache[index], oldestTime, latestTime, start === 0);
 
         const barsFromHBars: Bars = downSample(
             chart.hBars.slice(1),
@@ -1612,12 +1612,30 @@ export class Kuromaty {
             return ret;
         }
 
-        function  normalizeCache(cache: Bars) {
+        function  normalizeCache(cache: Bars, oldestTime, latestTime, isZeroStart) {
             if (cache === undefined || cache.length === 0 || cache[cache.length - 1][BarColumn.Time] > oldestTime) {
                 return createBars(oldestTime, period);
             }
 
-            return downSample(cache.slice(1), cache.period, period, oldestTime, latestTime);
+            if (isZeroStart) {
+                latestTime -= cache.period * 60 * 1000;
+            }
+            if (cache.period !== period) {
+                return downSample(cache, cache.period, period, oldestTime, latestTime);
+            }
+
+            const end = Math.max(0, timeToIndex(cache, period, latestTime));
+            const start = timeToIndex(cache, period, oldestTime);
+
+            if (end >= cache.length) {
+                return createBars(oldestTime, period);
+            }
+
+            const bars: Bars = cache.slice(end, start + 1);
+            bars.nextTick = cache[end][BarColumn.Time] + period * 60 * 1000;
+            bars.period = period;
+
+            return bars;
         }
 
         function mergeBars(bars1: Bars, bars2: Bars): Bars {
@@ -1677,7 +1695,7 @@ export class Kuromaty {
             }
 
             if (fromPeriod === period) {
-                const bars: Bars = fromBars.slice(end, start).map(util.deepCopy);
+                const bars: Bars = fromBars.slice(end, start + 1).map(util.deepCopy);
                 bars.nextTick = fromBars[end][BarColumn.Time] + fromPeriod * 60 * 1000;
                 bars.period = period;
 
