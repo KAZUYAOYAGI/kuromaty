@@ -22,7 +22,7 @@ export class EMA implements Overlay {
     draw(chart: Chart, dimensions: ChartDimensions, colors: ColorOption) {
 
         const ctx = chart.context;
-        const barX = dimensions.width - dimensions.rightMargin - 0.5;
+        const barX = dimensions.width - dimensions.rightMargin - Math.ceil(dimensions.barWidth / 2) + 0.5 /* hige width */;
         const barW = dimensions.barMargin + dimensions.barWidth;
         const barCount = dimensions.barCount;
         const ema = this.calculateEMA(chart, barCount);
@@ -42,7 +42,7 @@ export class EMA implements Overlay {
         ctx.beginPath();
         ctx.moveTo(barX, pointToY(ema[0]));
         const emaLength = Math.min(ema.length, barCount);
-        for (let i = 0, x = barX; i < emaLength; i++) {
+        for (let i = 1, x = barX; i < emaLength; i++) {
             x -= barW;
             ctx.lineTo(x, pointToY(ema[i]));
         }
