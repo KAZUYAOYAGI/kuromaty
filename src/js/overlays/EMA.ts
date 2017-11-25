@@ -7,7 +7,7 @@ export class EMA implements Overlay {
     minPeriod: number = 1;
 
     get requiredBackCount(): number {
-        return this.options.backCount;
+        return Math.max(this.options.period * 2, this.options.backCount);
     }
 
     options = {
@@ -61,7 +61,7 @@ export class EMA implements Overlay {
         const ema: number[] = [];
         const period = this.options.period;
         const bars = chart._bars;
-        const maxIndex = Math.min(bars.length - period, barCount + this.options.backCount);
+        const maxIndex = Math.min(bars.length - period, barCount + this.requiredBackCount);
 
         if (bars.length < period) {
             return [];
