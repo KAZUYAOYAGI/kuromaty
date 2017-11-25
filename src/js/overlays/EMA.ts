@@ -12,7 +12,6 @@ export class EMA implements Overlay {
 
     options = {
         period: 20,
-        backCount: 40,
         colorKey: "lineMA1"
     };
 
@@ -92,10 +91,6 @@ export class EMA implements Overlay {
 
 export interface Config {
     period: number;
-
-    /** @deprecated */
-    backCount: number;
-
     colorKey: string;
 }
 
