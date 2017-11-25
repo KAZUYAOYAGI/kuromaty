@@ -7,7 +7,7 @@ export class EMA implements Overlay {
     minPeriod: number = 1;
 
     get requiredBackCount(): number {
-        return Math.max(this.options.period * 2, this.options.backCount);
+        return Math.round((this.options.period + 1) * 3.45);
     }
 
     options = {
@@ -92,7 +92,10 @@ export class EMA implements Overlay {
 
 export interface Config {
     period: number;
+
+    /** @deprecated */
     backCount: number;
+
     colorKey: string;
 }
 
