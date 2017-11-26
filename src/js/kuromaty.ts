@@ -1983,7 +1983,7 @@ export class Kuromaty {
             return;
         }
 
-        this.barIndex -= Math.round(ev.deltaX ? ev.deltaX : -(ev.deltaY / 6));
+        this.barIndex -= Math.round(ev.deltaX ? ev.deltaX : -(ev.deltaMode === WheelEvent.DOM_DELTA_PIXEL ? ev.deltaY / 6 : ev.deltaY));
         const maxIndex = this._getMaxIndex();
         if (this.barIndex < 0) {
             this.barIndex = 0;
