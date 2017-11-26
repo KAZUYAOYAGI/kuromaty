@@ -892,7 +892,9 @@ export class Kuromaty {
 
                     // time
                     let timeStr;
-                    if (!(barDateHours === 0 && barDateMinutes === 0)) {
+                    if (barX > chartW - 40) {
+                       timeStr = null;
+                    } else if (!(barDateHours === 0 && barDateMinutes === 0)) {
                         timeStr = `${barDateHours}:${util.zeroPadding(barDateMinutes, 2)}`;
                     } else if (period >= 1440 && barDateDate > 22) {
                         timeStr = null;
@@ -1235,7 +1237,9 @@ export class Kuromaty {
         this.grid.context.textAlign = "right";
         this.grid.context.fillStyle = this.color.text;
         this.grid.context.fillText(
-            `:${util.zeroPadding(barDate.getMinutes(), 2)}`,
+            period >= TimeByMinutes.OneDay ?  `${barDate.getDate()}` :
+                period >= TimeByMinutes.OneHour ? `${barDate.getHours()}:00` :
+                `:${util.zeroPadding(barDate.getMinutes(), 2)}`,
             canvasW - 45,
             canvasH - 4
         );
