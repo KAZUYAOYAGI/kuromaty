@@ -1590,8 +1590,13 @@ export class Kuromaty {
 
         const cached: Bars = normalizeCache(this._barsDownSampleCache[index], oldestTime, latestTime, start === 0);
 
+        // 分足が不十分な場合に対応
+        // ただし、その場合volumeが重複カウントされる可能性があるため、
+        // 今後updateHBarsで提供する足データにどこまで集計してあるかわかる情報を付加できるようにするか、
+        // 最初に分足を現在時刻の時の0分(現在1:13なら1:00)からの分を設定することを求める必要がある
+        const mBarExistsBeforeThisHour = chart.bars.length >= timeToIndex(chart.bars, 1, truncateTime(TimeByMinutes.OneHour, chart.bars[0][BarColumn.Time]));
         const barsFromHBars: Bars = downSample(
-            chart.hBars.slice(1),
+            mBarExistsBeforeThisHour ? chart.hBars.slice(1) : chart.hBars,
             TimeByMinutes.OneHour,
             period,
             cached.nextTick,
