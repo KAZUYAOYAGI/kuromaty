@@ -1641,7 +1641,7 @@ export class Kuromaty {
             }
 
             const bars: Bars = cache.slice(end, start + 1);
-            bars.nextTick = cache[end][BarColumn.Time] + period * 60 * 1000;
+            bars.nextTick = end === 0 ? cache.nextTick : cache[end - 1][BarColumn.Time];
             bars.period = period;
 
             return bars;
@@ -1699,7 +1699,7 @@ export class Kuromaty {
             const end = Math.max(0, timeToIndex(fromBars, fromPeriod, latestTime));
             const start = timeToIndex(fromBars, fromPeriod, oldestTime);
 
-            if (end >= fromBars.length) {
+            if (end >= fromBars.length || start < end) {
                 return createBars(oldestTime, period);
             }
 
