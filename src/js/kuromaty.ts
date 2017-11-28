@@ -607,8 +607,6 @@ export class Kuromaty {
         const decimalPower = this.options.decimalPower;
         const period = this.timePeriod;
 
-        let i = 0;
-        let j = 0;
         let l = 0;
         const m = this.charts.length;
         let highest = 0;
@@ -629,7 +627,7 @@ export class Kuromaty {
         this.hasDepleted = false;
 
         // pre
-        for (j = 0; j < m; j++) {
+        for (let j = 0; j < m; j++) {
             const chart = this.charts[j];
 
             chart.context.clearRect(0, 0, canvasW, canvasH);
@@ -655,7 +653,7 @@ export class Kuromaty {
                 }
             }
 
-            for (i = 0; i < l; i++) {
+            for (let i = 0; i < l; i++) {
                 bar = chart._bars[i];
                 if (!bar) {
                     break;
@@ -719,7 +717,7 @@ export class Kuromaty {
         this.overlay.context.clearRect(0, 0, canvasW, canvasH);
 
         // main
-        for (j = 0; j < m; j++) {
+        for (let j = 0; j < m; j++) {
             const chart = this.charts[j];
             const ctx = chart.context;
             let barX = chartW - chartM;
@@ -729,7 +727,7 @@ export class Kuromaty {
             }
 
             // bars
-            for (i = 0; i < l; i++) {
+            for (let i = 0; i < l; i++) {
                 bar = chart._bars[i];
                 if (!bar || !chart._bars[i + 1]) {
                     break;
@@ -935,7 +933,7 @@ export class Kuromaty {
 
                 gridPriceDelta *= Math.ceil(80 / (gridPriceDelta * chart.ratio));
                 lowestGridPrice = this.calculateHorizontalGridLowestPrice(chart, gridPriceDelta);
-                for (i = lowestGridPrice; i < chart.highest; i += gridPriceDelta) {
+                for (let i = lowestGridPrice; i < chart.highest; i += gridPriceDelta) {
                     cp = Math.round((chart.highest - i) * chart.ratio);
                     if (cp + 30 > chartH) {
                         continue;
@@ -1082,7 +1080,7 @@ export class Kuromaty {
                     this.overlay.context.save();
 
                     this.overlay.context.fillStyle = this.color.askOrder;
-                    for (i = 0; i < chart.board.asks.length - 1; i++) {
+                    for (let i = 0; i < chart.board.asks.length - 1; i++) {
                         board = chart.board.asks[i];
 
                         this.overlay.context.globalAlpha = Math.min(1, board.size / chart.boardMaxSize + 0.12);
@@ -1094,7 +1092,7 @@ export class Kuromaty {
                         );
                     }
                     this.overlay.context.fillStyle = this.color.bidOrder;
-                    for (i = 0; i < chart.board.bids.length - 1; i++) {
+                    for (let i = 0; i < chart.board.bids.length - 1; i++) {
                         board = chart.board.bids[i];
 
                         this.overlay.context.globalAlpha = Math.min(1, board.size / chart.boardMaxSize + 0.12);
@@ -1183,7 +1181,7 @@ export class Kuromaty {
             barWidth: this.options.barWidth
         };
 
-        for (j = 0; j < m; j++) {
+        for (let j = 0; j < m; j++) {
             const chart = this.charts[j];
             if (!chart.selected) {
                 break;
@@ -1248,7 +1246,7 @@ export class Kuromaty {
         this.cursorPrice = 0;
         if (this.cursorX > 0 && this.cursorY > 30 && this.cursorX < chartW && this.cursorY < chartH) {
             let pX = this.cursorX - (this.cursorX % barW);
-            i = Math.round((chartW - pX - chartM - this.options.barWidth) / barW);
+            const i = Math.round((chartW - pX - chartM - this.options.barWidth) / barW);
             pX = Math.floor(chartW - chartM - (i * barW) - (barW / 2)) - 1;
 
             // bar line
@@ -1297,7 +1295,7 @@ export class Kuromaty {
             this.cursorBoardPrice = 0;
             if (chart.board) {
                 if (this.cursorPrice > chart.latest) {
-                    for (j = chart.board.asks.length - 1; j >= 0; j--) {
+                    for (let j = chart.board.asks.length - 1; j >= 0; j--) {
                         if (chart.board.asks[j].price <= this.cursorPrice) {
                             this.cursorBoard = chart.board.asks[j].size;
                             this.cursorBoardPrice = chart.board.asks[j].price;
@@ -1306,7 +1304,7 @@ export class Kuromaty {
                     }
                 }
                 if (this.cursorPrice < chart.latest) {
-                    for (j = chart.board.bids.length - 1; j >= 0; j--) {
+                    for (let j = chart.board.bids.length - 1; j >= 0; j--) {
                         if (chart.board.bids[j].price >= this.cursorPrice) {
                             this.cursorBoard = chart.board.bids[j].size;
                             this.cursorBoardPrice = chart.board.bids[j].price;
