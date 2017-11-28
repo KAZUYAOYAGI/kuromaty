@@ -891,7 +891,9 @@ export class Kuromaty {
                     // time
                     let timeStr;
                     if (barX > chartW - 40) {
-                       timeStr = null;
+                        timeStr = null;
+                    } else if (period === 0) {
+                        timeStr = `${barDate.getSeconds()}s`;
                     } else if (!(barDateHours === 0 && barDateMinutes === 0)) {
                         timeStr = `${barDateHours}:${util.zeroPadding(barDateMinutes, 2)}`;
                     } else if (period >= 1440 && barDateDate > 22) {
@@ -1202,7 +1204,7 @@ export class Kuromaty {
                 let i = 0;
                 let p = 0;
                 let y = 0;
-                let x = chartW - chartM - 0.5 + barW;
+                let x = chartW - chartM - Math.ceil(barW / 2) + 1 + barW;
                 for (; i < barCount; i++) {
                     if (!chart._bars[i]) {
                         break;
@@ -1231,16 +1233,18 @@ export class Kuromaty {
         } // overlays
 
         // datetime
-        barDate = new Date(this.charts[0]._bars[0][BarColumn.Time]);
-        this.grid.context.textAlign = "right";
-        this.grid.context.fillStyle = this.color.text;
-        this.grid.context.fillText(
-            period >= TimeByMinutes.OneDay ?  `${barDate.getDate()}` :
-                period >= TimeByMinutes.OneHour ? `${barDate.getHours()}:00` :
-                `:${util.zeroPadding(barDate.getMinutes(), 2)}`,
-            canvasW - 45,
-            canvasH - 4
-        );
+        if (period > 0) {
+            barDate = new Date(this.charts[0]._bars[0][BarColumn.Time]);
+            this.grid.context.textAlign = "right";
+            this.grid.context.fillStyle = this.color.text;
+            this.grid.context.fillText(
+                period >= TimeByMinutes.OneDay ?  `${barDate.getDate()}` :
+                    period >= TimeByMinutes.OneHour ? `${barDate.getHours()}:00` :
+                        `:${util.zeroPadding(barDate.getMinutes(), 2)}`,
+                canvasW - 45,
+                canvasH - 4
+            );
+        }
 
         // cursor
         this.cursorPrice = 0;
