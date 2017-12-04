@@ -1230,6 +1230,8 @@ export class Kuromaty {
                     this.overlays[name].draw(chart, dimensions, this.color);
                 }
             }
+
+            chart.context.clearRect(0, chartH, chartW, canvasH);
         } // overlays
 
         // datetime
