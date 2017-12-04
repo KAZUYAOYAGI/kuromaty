@@ -1231,7 +1231,7 @@ export class Kuromaty {
                 }
             }
 
-            chart.context.clearRect(0, chartH, chartW, canvasH);
+            chart.context.clearRect(0, chartH, chartW, canvasH - chartH);
         } // overlays
 
         // datetime
