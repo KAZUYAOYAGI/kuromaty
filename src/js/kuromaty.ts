@@ -702,11 +702,6 @@ export class Kuromaty {
             chart.depthRatio = (chartH / 5) / (maxDepth - minDepth);
 
             chart.canvas.style.opacity = chart.selected ? "1" : "0.2";
-
-            // border
-            chart.context.fillStyle = this.color.border;
-            chart.context.fillRect(chartW, 0, 1, chartH);
-            chart.context.fillRect(0, chartH, chartW + 1, 1);
         }// pre
 
         this.grid.context.clearRect(0, 0, canvasW, canvasH);
@@ -1172,7 +1167,6 @@ export class Kuromaty {
             }
         } // main
 
-        // overlays
         const dimensions: ChartDimensions = {
             width: chartW,
             height: chartH,
@@ -1183,12 +1177,14 @@ export class Kuromaty {
             barWidth: this.options.barWidth
         };
 
+        // drawing only for selected chart
         for (let j = 0; j < m; j++) {
             const chart = this.charts[j];
             if (!chart.selected) {
                 break;
             }
 
+            // Tick graph
             if (period === 0) {
                 const ctx = chart.context;
 
@@ -1225,6 +1221,7 @@ export class Kuromaty {
                 ctx.restore();
             }
 
+            // overlays
             for (const name in this.overlays) {
                 if (this.overlays[name].minPeriod <= period) {
                     this.overlays[name].draw(chart, dimensions, this.color);
@@ -1232,7 +1229,12 @@ export class Kuromaty {
             }
 
             chart.context.clearRect(0, chartH, chartW, canvasH - chartH);
-        } // overlays
+
+            // border
+            chart.context.fillStyle = this.color.border;
+            chart.context.fillRect(chartW, 0, 1, chartH);
+            chart.context.fillRect(0, chartH, chartW + 1, 1);
+        } // drawing only for selected chart
 
         // datetime
         if (period > 0) {
