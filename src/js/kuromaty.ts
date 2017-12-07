@@ -1994,7 +1994,7 @@ export class Kuromaty {
         ev.preventDefault();
 
         if (ev.ctrlKey) {
-            this.zoom(ev.deltaY < 0 ? 1 : ev.deltaY > 0 ? -1 : 0);
+            this.zoom(ev.deltaY < 0 ? 2 : ev.deltaY > 0 ? -2 : 0);
             return;
         }
 
