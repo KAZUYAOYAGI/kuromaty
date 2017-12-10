@@ -212,6 +212,7 @@ export class Kuromaty {
     private _afs = 0;
     private _pricePops: [number, string, string, number, number, boolean, string][] = [];
     private _lastPointerdown: [number, number] = [0, 0];
+    private _lastPointerType: "mouse" | "pen" | "touch";
     private _lastPointerButtons = 0;
     private _dragStartX: number;
     private _dragStartI: number;
@@ -490,12 +491,18 @@ export class Kuromaty {
             this.canvases.push(this.overlay.canvas);
             this.contexts.push(this.overlay.context);
 
-            this.overlay.canvas.addEventListener("pointerdown", this._pointerdownHandler.bind(this));
-            this.overlay.canvas.addEventListener("pointerup", this._pointerupHandler.bind(this));
-            this.overlay.canvas.addEventListener("pointermove", this._pointermoveHandler.bind(this));
-            this.overlay.canvas.addEventListener("pointerout", this._pointeroutHandler.bind(this));
-            this.overlay.canvas.addEventListener("wheel", this._wheelHandler.bind(this)/* , { passive: true } */);
-            this.overlay.canvas.addEventListener("contextmenu", this._contextmenuHandler.bind(this));
+            if (/iPad;|iPhone;/.test(navigator.userAgent) === true) {
+                this.overlay.canvas.addEventListener("touchstart", this._touchEventsHandler.bind(this));
+                this.overlay.canvas.addEventListener("touchmove", this._touchEventsHandler.bind(this));
+                this.overlay.canvas.addEventListener("touchend", this._touchEventsHandler.bind(this));
+            } else {
+                this.overlay.canvas.addEventListener("pointerdown", this._pointerdownHandler.bind(this));
+                this.overlay.canvas.addEventListener("pointerup", this._pointerupHandler.bind(this));
+                this.overlay.canvas.addEventListener("pointermove", this._pointermoveHandler.bind(this));
+                this.overlay.canvas.addEventListener("pointerout", this._pointeroutHandler.bind(this));
+                this.overlay.canvas.addEventListener("wheel", this._wheelHandler.bind(this)/* , { passive: true } */);
+                this.overlay.canvas.addEventListener("contextmenu", this._contextmenuHandler.bind(this));
+            }
         }
 
         for (let i = 0; i < this.options.chartCount; i++) {
@@ -1398,13 +1405,16 @@ export class Kuromaty {
                         `  ${util.toStringWithSign(diff)}%`
                     ),
                     10,
-                    20
+                    20,
+                    canvasW - 20
                 );
-                this.overlay.context.fillText(
-                    "[価格マーカー] 左クリックで追加・削除",
-                    10,
-                    40
-                );
+                if (this._lastPointerType === "mouse") {
+                    this.overlay.context.fillText(
+                        "[価格マーカー] 左クリックで追加・削除",
+                        10,
+                        40
+                    );
+                }
 
                 // Volume
                 if (chart._bars[i + 1]) {
@@ -1849,6 +1859,50 @@ export class Kuromaty {
         }).open(ev);
     }
 
+    private _touchEventsHandler(ev: TouchEvent) {
+
+        let nextHandler: (ev: PointerEvent) => void;
+        switch (ev.type) {
+            case "touchstart":
+                nextHandler = this._pointerdownHandler;
+                break;
+            case "touchmove":
+                nextHandler = this._pointermoveHandler;
+                break;
+            case "touchend":
+                nextHandler = this._pointerupHandler;
+                break;
+        }
+
+        const rect = (<Element> ev.target).getBoundingClientRect();
+
+        for (let i = 0, len = ev.changedTouches.length; i < len; i++) {
+            const touch = ev.changedTouches[i];
+
+            nextHandler.call(this, {
+                preventDefault: () => ev.preventDefault(),
+
+                target: ev.target,
+                pointerType: "touch",
+                pointerId: touch.identifier,
+                buttons: ev.type === "touchend" ? 0 : 1,
+                pageX: touch.pageX,
+                pageY: touch.pageY,
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                offsetX: touch.clientX - rect.left,
+                offsetY: touch.clientY - rect.top
+            });
+
+            // ignore for now
+            break;
+        }
+
+        if (ev.type === "touchend") {
+            this._pointeroutHandler.call(this, ev);
+        }
+    }
+
     private _pointerdownHandler(ev: PointerEvent) {
 
         if (ev.target !== this.overlay.canvas) {
@@ -1889,6 +1943,7 @@ export class Kuromaty {
         }
 
         this._lastPointerdown = [offsetX, offsetY];
+        this._lastPointerType = ev.pointerType;
         this._lastPointerButtons = buttons;
         this._dragStartX = undefined;
     }
@@ -1925,6 +1980,7 @@ export class Kuromaty {
         }
 
         this._lastPointerdown = [0, 0];
+        this._lastPointerType = null;
         this._lastPointerButtons = 0;
 
         this._hasUpdated = true;
