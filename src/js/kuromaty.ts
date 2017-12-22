@@ -72,6 +72,7 @@ export interface Options {
     barMargin?: number;
     decimalPower?: number;
     boardGroupSize?: number;
+    boardGroupMinimumHeight?: number;
     pricePopEffect?: boolean;
     quickOrder?: boolean;
     quickOrderHandler?: (order: QuickOrder) => void;
@@ -117,6 +118,7 @@ export interface BoardItem {
 }
 
 export interface Chart {
+    _boardGroupSize: number;
     title: string;
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
@@ -242,6 +244,7 @@ export class Kuromaty {
         options.barWidth = options.barWidth || 5;
         options.barMargin = options.barMargin || 3;
         options.decimalPower = options.decimalPower || 0;
+        options.boardGroupMinimumHeight = options.boardGroupMinimumHeight || 1;
         this._decimal = parseInt("1" + Array(options.decimalPower + 1).join("0"), 10);
 
         this._create();
@@ -398,12 +401,13 @@ export class Kuromaty {
         board = util.deepCopy(board);
 
         const chart = this.charts[index];
-        const groupPrice = util.generatePriceGrouping(this._decimal, this.options.boardGroupSize);
+        const maxPrice = chart.highest;
+        const minPrice = chart.lowest;
+        chart._boardGroupSize = Math.max(Math.ceil( this.options.boardGroupMinimumHeight / chart.ratio), this.options.boardGroupSize);
+        const groupPrice = util.generatePriceGrouping(this._decimal, chart._boardGroupSize);
 
         let boardMaxSize = 0;
 
-        const maxPrice = chart.highest;
-        const minPrice = chart.lowest;
         function groupUp(boardItems: BoardItem[]) {
 
             if (boardItems.length === 0) {
@@ -526,7 +530,8 @@ export class Kuromaty {
                 latest: 0,
                 ratio: 1,
                 tickDelta: 0,
-                selected: i === 0
+                selected: i === 0,
+                _boardGroupSize: this.options.boardGroupSize
             };
             chart.context = chart.canvas.getContext("2d");
 
@@ -648,7 +653,7 @@ export class Kuromaty {
             l = Math.min(barCount, chart._bars.length);
 
             if (chart.selected) {
-                if (requireBarCount > chart._bars.length && this.maxBarCount > (period > TimeByMinutes.OneHour ? chart.hBars.length : chart.bars.length)) {
+                if (requireBarCount > chart._bars.length) {
                     this.hasDepleted = true;
                 }
             }
@@ -1072,7 +1077,7 @@ export class Kuromaty {
                 // Board (testing)
                 if (chart.board) {
                     let board: BoardItem;
-                    const boardItemHeight = Math.round((this.options.boardGroupSize / decimal) * chart.ratio);
+                    const boardItemHeight = Math.round((chart._boardGroupSize / decimal) * chart.ratio);
 
                     this.overlay.context.save();
 
